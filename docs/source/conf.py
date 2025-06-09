@@ -44,12 +44,9 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from importlib.metadata import metadata
 
-sys.path.insert(0, os.path.realpath("../"))
+sys.path.insert(0, os.path.relpath("../"))
 
-
-merlinMetadata = metadata('merlin-quandela')
 
 REPO_PATH = Path(__file__).parent.parent.parent.resolve()
 
@@ -58,11 +55,14 @@ if not os.path.exists(build_directory):
     os.makedirs(build_directory)
 
 # -- Project information -----------------------------------------------------
-author = merlinMetadata['Author'].capitalize()
-project = merlinMetadata['Name']
-copyright = f"{datetime.now().year}, {author}"
 
-release = merlinMetadata['Version']
+import merlin
+
+project = "MerLin"
+copyright = "MerLin contributors, " + str(datetime.now().year)
+author = "MerLin contributors"
+merlin_version = str(merlin.__version__)
+release = f"main ({merlin_version})"
 
 # -- General configuration ---------------------------------------------------
 
@@ -92,14 +92,13 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-# nbsphinx_allow_errors = True
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "renku"
+html_theme = "sphinx_rtd_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -107,13 +106,14 @@ html_theme = "renku"
 html_static_path = ["_static"]
 
 html_theme_options = {
-    "navigation_depth": 2,
+    "navigation_depth": 4,
     "titles_only": False,
-    "version_selector": True,
+    "version_selector": False,
+    'sticky_navigation': True,
 }
 
 html_style = "css/style.css"
-html_logo = "_static/img/Merlin logo white 160x160.png"
+html_logo = "_static/img/merlin_white.png"
 html_favicon = "_static/img/Merlin icon white 32x32.ico"
 
 nbsphinx_execute_arguments = [

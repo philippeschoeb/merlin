@@ -19,6 +19,12 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+# Generate API documentation
+apidoc:
+	@echo "Generating API documentation..."
+	sphinx-apidoc -o $(SOURCEDIR)/reference/api/ ../merlin/ --separate --module-first --force
+	@echo "API documentation generated in $(SOURCEDIR)/api/"
+
 multiversion:
 	python -m sphinx_multiversion -f multiversion_config source build/html
 
