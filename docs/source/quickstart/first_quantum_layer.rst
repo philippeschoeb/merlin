@@ -205,7 +205,7 @@ Using Factory-Created Layers in Models
 
 
 Method 3: Direct Circuit Definition (Advanced)
----------------------------------------------
+----------------------------------------------
 
 For complete control over the quantum circuit, define it directly using Perceval.
 

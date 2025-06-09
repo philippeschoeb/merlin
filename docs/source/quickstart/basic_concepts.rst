@@ -95,7 +95,8 @@ Basic Encoding Process
     quantum_parameters = np.pi * x * bandwidth_coefficients
 
 **Key Steps**:
-1. **Normalization**: Ensure inputs are in [0,1] range
+
+1. **Normalization**: Ensure inputs are in \([0,1]\) range
 2. **Scaling**: Apply scaling for quantum parameter ranges
 3. **Circuit Mapping**: Distribute to quantum parameters based on ansatz
 
@@ -103,14 +104,15 @@ Amplitude encoding Process
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Amplitude encoding** maps classical data values to the amplitudes of a quantum state.
-Given a normalized vector x = (x_0, x_1, ..., x_(2^n-1)), the encoding creates
-a quantum state |psi> = sum_i x_i |i> where |i> represents the computational basis state.
-This technique requires n qubits to encode 2^n data points, offering exponential
+Given a normalized vector \(x = (x_0, x_1, ..., x_{2^n-1})\), the encoding creates
+a quantum state \(|psi\gt = sum_i x_i |i>\) where \(|i\gt\) represents the computational basis state.
+This technique requires n qubits to encode \(2^n\) data points, offering exponential
 compression but requiring complex state preparation circuits, unless the state can be prepared at source.
 
 
 **Key Steps**:
-1. **Normalization**: Ensure inputs are in [0,1] range
+
+1. **Normalization**: Ensure inputs are in \([0,1]\) range
 2. **Scaling**: Apply scaling for quantum parameter ranges
 3. **Circuit Mapping**: Distribute to quantum parameters based on ansatz
 
