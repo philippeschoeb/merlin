@@ -38,10 +38,10 @@ At the foundation, Merlin uses **photonic quantum computing**, where information
 
 For a deeper understanding of photonic quantum computing fundamentals, see :doc:`../research/architectures`.
 
-2. Photonic Backend: Mathematical Models
+2. Backend : Mathematical Models
 ========================================
 
-The **Photonic Backend** provides mathematical representations of quantum circuits, handling the complex quantum mechanics while exposing a clean interface for machine learning.
+The **Backend** provides mathematical representations of quantum circuits, handling the complex quantum mechanics while exposing a clean interface for machine learning.
 
 Key responsibilities:
 
@@ -49,13 +49,7 @@ Key responsibilities:
 - **Parameter Management**: Tracking which components are configurable vs. fixed
 - **Measurement Simulation**: Converting quantum states to probability distributions
 
-.. code-block:: python
 
-    # The backend handles quantum computation automatically
-    backend = PhotonicBackend(n_modes=4, n_photons=2)
-
-    # You work with logical concepts, not quantum mechanics
-    probabilities = backend.compute(circuit, parameters, input_state)
 
 3. Ansatz: Logical Circuit Templates
 ===================================
@@ -99,6 +93,20 @@ Basic Encoding Process
 
     # Quantum encoding (automatic in Merlin)
     quantum_parameters = π × x × bandwidth_coefficients
+
+**Key Steps**:
+1. **Normalization**: Ensure inputs are in [0,1] range
+2. **Scaling**: Apply scaling for quantum parameter ranges
+3. **Circuit Mapping**: Distribute to quantum parameters based on ansatz
+
+Amplitude encoding Process
+^^^^^^^^^^^^^^^^^^^^^^
+**Amplitude encoding** maps classical data values to the amplitudes of a quantum state.
+Given a normalized vector x = (x_0, x_1, ..., x_(2^n-1)), the encoding creates
+a quantum state |psi> = sum_i x_i |i> where |i> represents the computational basis state.
+This technique requires n qubits to encode 2^n data points, offering exponential
+compression but requiring complex state preparation circuits, unless the state can be prepared at source.
+
 
 **Key Steps**:
 1. **Normalization**: Ensure inputs are in [0,1] range
