@@ -1,8 +1,8 @@
 :github_url: https://github.com/merlinquantum/merlin
 
-==============
+===============
 Basic Concepts
-==============
+===============
 
 This guide introduces the fundamental concepts behind Merlin's approach to quantum neural networks.
 
@@ -52,7 +52,7 @@ Key responsibilities:
 
 
 3. Ansatz: Logical Circuit Templates
-===================================
+====================================
 
 An **Ansatz** is a logical template that defines the structure of your quantum circuit, specifying:
 
@@ -92,7 +92,7 @@ Basic Encoding Process
     x = [0.3, 0.7, 0.9]
 
     # Quantum encoding (automatic in Merlin)
-    quantum_parameters = π × x × bandwidth_coefficients
+    quantum_parameters = np.pi * x * bandwidth_coefficients
 
 **Key Steps**:
 1. **Normalization**: Ensure inputs are in [0,1] range
@@ -100,7 +100,8 @@ Basic Encoding Process
 3. **Circuit Mapping**: Distribute to quantum parameters based on ansatz
 
 Amplitude encoding Process
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 **Amplitude encoding** maps classical data values to the amplitudes of a quantum state.
 Given a normalized vector x = (x_0, x_1, ..., x_(2^n-1)), the encoding creates
 a quantum state |psi> = sum_i x_i |i> where |i> represents the computational basis state.
@@ -238,7 +239,7 @@ Here's how all these concepts work together in practice:
     # - Quantum-to-classical output mapping
 
 Design Guidelines
-================
+=================
 
 When choosing configurations, consider these general principles:
 

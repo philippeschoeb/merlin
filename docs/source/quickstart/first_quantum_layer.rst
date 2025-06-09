@@ -1,13 +1,13 @@
 :github_url: https://github.com/merlinquantum/merlin
 
-========================
-Your First Quantum Layer
-========================
+=========================
+Your First Quantum Layers
+=========================
 Merlin provides three approaches to create quantum neural networks, from simple to advanced:
 
-1. **Simple API**: Quick start with minimal configuration
-2. **Factory Method**: More control with pre-built architectures
-3. **Direct Circuit Definition**: Full control over quantum circuit design
+1. `Simple API <#method-1-simple-api-easiest>`_ : Quick start with minimal configuration
+2. `Factory Method <#method-2-factory-method-intermediate>`_ : More control with pre-built architectures
+3. `Direct Circuit Definition <#method-3-direct-circuit-definition-advanced>`_ : Full control over quantum circuit design
 
 We'll start with the easiest approach and progress to more advanced methods.
 
@@ -407,23 +407,3 @@ Train your hybrid model with standard PyTorch workflows:
             print(f"Epoch {epoch}: Loss={loss:.4f}, Test Loss={test_loss:.4f}, Test Acc={test_acc:.4f}")
             model.train()
 
-
-
-
-Best Practices
-^^^^^^^^^^^^^^
-
-1. **Start Simple**: Begin with the simple API to understand quantum layers
-2. **Input Normalization**: Always ensure inputs are in [0, 1] range
-3. **Batch Processing**: Quantum layers support batched inputs like standard PyTorch
-4. **Gradients**: All methods support automatic differentiation
-5. **Hybrid Models**: Combine quantum layers with classical layers for best results
-
-Next Steps
-^^^^^^^^^^
-
-- Try the simple API with your own dataset
-- Experiment with different factory circuit types
-- Learn Perceval to create custom quantum circuits
-- Explore different output mapping strategies
-- Optimize shot counts for speed vs. accuracy trade-offs
