@@ -7,7 +7,7 @@ Basic Concepts
 This guide introduces the fundamental concepts behind Merlin's approach to quantum neural networks.
 
 Conceptual Overview
-==================
+===================
 
 Merlin bridges the gap between physical quantum circuits and high-level machine learning interfaces through a layered architecture. From lowest to highest level:
 
