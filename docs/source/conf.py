@@ -49,7 +49,7 @@ from importlib.metadata import metadata
 sys.path.insert(0, os.path.realpath("../"))
 
 
-merlinMetadata = metadata('merlin-quandela')
+merlinMetadata = metadata('merlinquantum')
 
 REPO_PATH = Path(__file__).parent.parent.parent.resolve()
 
