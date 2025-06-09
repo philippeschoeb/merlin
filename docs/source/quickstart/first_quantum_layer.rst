@@ -3,22 +3,211 @@
 ========================
 Your First Quantum Layer
 ========================
+Merlin provides three approaches to create quantum neural networks, from simple to advanced:
 
-Merlin follows a simple workflow for creating quantum neural networks:
+1. **Simple API**: Quick start with minimal configuration
+2. **Factory Method**: More control with pre-built architectures
+3. **Direct Circuit Definition**: Full control over quantum circuit design
 
-1. **Define Circuit**: Create the quantum circuit using Perceval
-2. **Build Layer**: Integrate into PyTorch neural networks
+We'll start with the easiest approach and progress to more advanced methods.
+
+Method 1: Simple API (Easiest)
+------------------------------
+
+The simplest way to create a quantum layer is using the ``.simple()`` method. This is perfect for beginners who want to quickly integrate quantum processing into their neural networks.
+
+Basic Example
+^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    import torch
+    import torch.nn as nn
+    import merlin as ML
+
+    class HybridIrisClassifier(nn.Module):
+        """
+        Hybrid model for Iris classification:
+        - Classical layer reduces 4 features to 3
+        - Quantum layer processes the 3 features
+        - Classical output layer for 3-class classification
+        """
+        def __init__(self):
+            super(HybridIrisClassifier, self).__init__()
+
+            # Classical preprocessing layer
+            self.classical_in = nn.Sequential(
+                nn.Linear(4, 8),
+                nn.ReLU(),
+                nn.Linear(8, 3),
+                nn.Tanh()  # Normalize to [-1, 1] for quantum layer
+            )
+
+            # Quantum layer
+            # Just specify input size and approximate parameter count
+            self.quantum = ML.QuantumLayer.simple(
+                input_size=3,      # 3 input features
+                n_params=100,      # ~100 quantum parameters
+                shots=10000        # Number of measurements
+            )
+
+            # Classical output layer
+            self.classical_out = nn.Sequential(
+                nn.Linear(self.quantum.output_size, 8),
+                nn.ReLU(),
+                nn.Dropout(0.1),
+                nn.Linear(8, 3)  # 3 classes
+            )
+
+            print(f"\nModel Architecture:")
+            print(f"  Input: 4 features")
+            print(f"  Classical preprocessing: 4 → 3")
+            print(f"  Quantum layer: 3 → {self.quantum.output_size}")
+            print(f"  Classical output: {self.quantum.output_size} → 3 classes")
+
+        def forward(self, x):
+            # Preprocess with classical layer
+            x = self.classical_in(x)
+
+            # Process through quantum layer
+            # Note: quantum layer expects inputs in [0, 1], so we shift tanh output
+            x = (x + 1) / 2  # Convert from [-1, 1] to [0, 1]
+            x = self.quantum(x)
+
+            # Final classification
+            x = self.classical_out(x)
+            return x
+
+Training the Simple Model
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    # Create model
+    model = HybridIrisClassifier()
+
+    # Standard PyTorch training
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    criterion = nn.CrossEntropyLoss()
+
+    # Training loop (standard PyTorch)
+    for epoch in range(50):
+        optimizer.zero_grad()
+        outputs = model(X_train)
+        loss = criterion(outputs, y_train)
+        loss.backward()
+        optimizer.step()
 
 
-Step 1: Basic Example
----------------------
 
-Let's start with a simple classification task using the direct circuit definition - in this case, we will define
-a quantum circuit manually using Perceval's API, and then create a quantum layer that can be used in a PyTorch model.
+Method 2: Factory Method (Intermediate)
+---------------------------------------
 
-Don't worry if you are not familiar with Perceval or quantum circuits yet! This example will guide you through the
-process step by step and we will see in the next sections how to use the high-level API to create quantum layers without
-needing to define the circuit manually.
+For more control over the quantum architecture while still using pre-built circuits, use the factory method approach.
+
+Creating Quantum Layers with Factories
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    from merlin import PhotonicBackend, CircuitType, StatePattern, AnsatzFactory, QuantumLayer
+    from merlin import OutputMappingStrategy
+
+    # Define the quantum experiment configuration
+    n_modes = 6
+    n_photons = 3
+    input_size = 4
+
+    # Create experiment with Series circuit
+    photonicbackend = PhotonicBackend(
+        circuit_type=CircuitType.SERIES,
+        n_modes=n_modes,
+        n_photons=n_photons,
+        reservoir_mode=True,         # Non-trainable quantum layer
+        use_bandwidth_tuning=False,  # No bandwidth tuning
+        state_pattern=StatePattern.PERIODIC
+    )
+
+    # Create ansatz with automatic output size
+    ansatz = AnsatzFactory.create(
+        PhotonicBackend=photonicbackend,
+        input_size=input_size,
+        # output_size not specified - will be calculated automatically unless specified
+        output_mapping_strategy=OutputMappingStrategy.NONE
+    )
+
+    # Create quantum layer
+    quantum_layer = QuantumLayer(
+        input_size=input_size,
+        ansatz=ansatz,
+        shots=10000,           # Number of measurement shots
+        no_bunching=False
+    )
+
+Available Circuit Types
+^^^^^^^^^^^^^^^^^^^^^^^
+
+merlin provides several pre-built circuit architectures:
+
+- ``CircuitType.SERIES``: Gan et al paper circuit design implementation
+- Other circuit types available in the library
+
+State Patterns
+^^^^^^^^^^^^^^
+
+Control how photons are distributed:
+
+- ``StatePattern.PERIODIC``: 1 photon every 2 modes i.e 101010
+- ``StatePattern.SEQUENTIAL``: photons injected into the first modes seen i.e 111000
+
+Using Factory-Created Layers in Models
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    class FactoryHybridModel(nn.Module):
+        def __init__(self):
+            super().__init__()
+
+            # Classical preprocessing
+            self.preprocess = nn.Linear(10, 4)
+
+            # Quantum layer from factory
+            photonicbackend = PhotonicBackend(
+                circuit_type=CircuitType.SERIES,
+                n_modes=8,
+                n_photons=4,
+                state_pattern=StatePattern.PERIODIC
+            )
+
+            ansatz = AnsatzFactory.create(
+                PhotonicBackend=photonicbackend,
+                input_size=4,
+                output_size = 10,
+                output_mapping_strategy=OutputMappingStrategy.LINEAR
+            )
+
+            self.quantum = QuantumLayer(
+                input_size=4,
+                ansatz=ansatz,
+                shots=5000
+            )
+
+            # Classical output
+            self.output = nn.Linear(self.quantum.output_size, 3)
+
+        def forward(self, x):
+            x = torch.relu(self.preprocess(x))
+            x = torch.sigmoid(x)  # Normalize to [0, 1]
+            x = self.quantum(x)
+            return self.output(x)
+
+
+
+Method 3: Direct Circuit Definition (Advanced)
+---------------------------------------------
+
+For complete control over the quantum circuit, define it directly using Perceval.
 
 Circuit Definition
 ^^^^^^^^^^^^^^^^^^
@@ -26,6 +215,8 @@ Circuit Definition
 The quantum circuit consists of three main parts:
 
 .. code-block:: python
+
+    import perceval as pcvl
 
     def create_quantum_circuit(m):
         # 1. Left interferometer - trainable transformation
@@ -50,6 +241,9 @@ The quantum circuit consists of three main parts:
             shape=pcvl.InterferometerShape.RECTANGLE
         )
 
+        # Combine all components
+        return wl // c_var // wr
+
 **Key Components**:
 
 - ``pcvl.BS()``: Beam splitter for quantum interference
@@ -57,15 +251,10 @@ The quantum circuit consists of three main parts:
 - ``pcvl.GenericInterferometer``: Creates complex interference patterns
 - ``pcvl.Circuit``: Container for quantum components
 
-Step 2: Create Quantum Layer
-----------------------------
+Create Quantum Layer from Circuit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
-
-    import torch
-    import torch.nn as nn
-    import perceval as pcvl
-    import merlin as ML
 
     # Create quantum layer
     m = 6  # 6 optical modes
@@ -77,21 +266,18 @@ Step 2: Create Quantum Layer
         circuit=circuit,                                           # Quantum circuit
         trainable_parameters=["theta"],                            # Parameters to train
         input_parameters=["px"],                                   # Input encoding parameters
-        input_state=[1, 0, 1, 0, 1, 0],           # Initial photon state
+        input_state=[1, 0, 1, 0, 1, 0],                           # Initial photon state
         output_mapping_strategy=ML.OutputMappingStrategy.LINEAR    # Output mapping
     )
 
     # Test the layer
     x = torch.rand(10, 4)  # Batch of 10 samples, 4 features each
     output = quantum_layer(x)
-    print(f"Input shape: {x.shape}")    # [10, 4]
+    print(f"Input shape: {x.shape}")      # [10, 4]
     print(f"Output shape: {output.shape}")  # [10, 3]
 
-Step 3: Understanding the Components
-------------------------------------
-
-Quantum Layer Parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Understanding Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -114,14 +300,12 @@ Quantum Layer Parameters
 - ``no_bunching``: Whether multiple photons can occupy the same mode
 - ``output_mapping_strategy``: How quantum probabilities become classical outputs
 
-Step 3: Hybrid Neural Network
------------------------------
-
-Integrate quantum layers into classical networks:
+Complete Hybrid Network Example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
-    class HybridClassifier(nn.Module):
+    class AdvancedHybridClassifier(nn.Module):
         def __init__(self, input_dim=8, n_classes=3, n_modes=6):
             super().__init__()
 
@@ -166,13 +350,13 @@ Integrate quantum layers into classical networks:
             return self.classifier(x)
 
     # Create and test model
-    model = HybridClassifier(input_dim=8, n_classes=3, n_modes=6)
+    model = AdvancedHybridClassifier(input_dim=8, n_classes=3, n_modes=6)
     x = torch.rand(16, 8)  # Batch of 16 samples
     output = model(x)
     print(f"Model output shape: {output.shape}")  # [16, 3]
 
-Step 4: Training Loop
----------------------
+Training the Advanced Model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Train your hybrid model with standard PyTorch workflows:
 
@@ -196,7 +380,7 @@ Train your hybrid model with standard PyTorch workflows:
     y_test = torch.LongTensor(y_test)
 
     # Setup training
-    model = HybridClassifier()
+    model = AdvancedHybridClassifier()
     optimizer = optim.Adam(model.parameters(), lr=0.01)
     criterion = nn.CrossEntropyLoss()
 
@@ -223,3 +407,23 @@ Train your hybrid model with standard PyTorch workflows:
             print(f"Epoch {epoch}: Loss={loss:.4f}, Test Loss={test_loss:.4f}, Test Acc={test_acc:.4f}")
             model.train()
 
+
+
+
+Best Practices
+^^^^^^^^^^^^^^
+
+1. **Start Simple**: Begin with the simple API to understand quantum layers
+2. **Input Normalization**: Always ensure inputs are in [0, 1] range
+3. **Batch Processing**: Quantum layers support batched inputs like standard PyTorch
+4. **Gradients**: All methods support automatic differentiation
+5. **Hybrid Models**: Combine quantum layers with classical layers for best results
+
+Next Steps
+^^^^^^^^^^
+
+- Try the simple API with your own dataset
+- Experiment with different factory circuit types
+- Learn Perceval to create custom quantum circuits
+- Explore different output mapping strategies
+- Optimize shot counts for speed vs. accuracy trade-offs
