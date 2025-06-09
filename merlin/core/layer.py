@@ -1,5 +1,5 @@
 """
-Main QuantumLayer implementation with bug fixes, index_photons support, and simple API.
+Main QuantumLayer implementation with bug fixes and index_photons support.
 """
 
 import math
@@ -10,40 +10,30 @@ import torch.nn as nn
 import perceval as pcvl
 
 from .ansatz import Ansatz, AnsatzFactory
-from ..core.photonicbackend import PhotonicBackend as Experiment
-from ..core.generators import CircuitType, StatePattern
 from ..sampling.strategies import OutputMappingStrategy
 from ..sampling.mappers import OutputMapper
 from ..sampling.autodiff import AutoDiffProcess
 from ..core.process import ComputationProcessFactory
 
+from ..core.photonicbackend import PhotonicBackend as Experiment
+from ..core.generators import CircuitType, StatePattern
 
 class QuantumLayer(nn.Module):
     """
     Enhanced Quantum Neural Network Layer with factory-based architecture.
 
-    This layer can be created in multiple ways:
-    1. Simple mode: QuantumLayer(input_size=3, n_params=100) - NEW!
-    2. Ansatz mode: QuantumLayer(input_size=3, ansatz=ansatz_object)
-    3. Custom mode: QuantumLayer(input_size=3, circuit=circuit_object, ...)
+    This layer can be created either from:
+    1. An Ansatz object (from AnsatzFactory) - for auto-generated circuits
+    2. Direct parameters - for custom circuits (backward compatible)
 
     Args:
-        input_size (int): Input dimension
-        n_params (int, optional): Target number of parameters for simple mode
-        ansatz (Ansatz, optional): Pre-created ansatz object
-        circuit (pcvl.Circuit, optional): Custom circuit
-        index_photons (List[Tuple[int, int]], optional): Photon placement constraints
-
-    Simple mode specific args:
-        circuit_type (CircuitType): Type of circuit (default: SERIES)
-        reservoir_mode (bool): Whether to use reservoir computing (default: False)
-        use_bandwidth_tuning (bool): Enable bandwidth tuning (default: False)
-        state_pattern (StatePattern): Pattern for input state (default: PERIODIC)
+        index_photons (List[Tuple[int, int]], optional): List of tuples (min_mode, max_mode)
+            constraining where each photon can be placed. The first_integer is the lowest
+            index layer a photon can take and the second_integer is the highest index.
+            If None, photons can be placed in any mode from 0 to m-1.
     """
 
     def __init__(self, input_size: int, output_size: Optional[int] = None,
-                 # Simple mode parameters (NEW!)
-                 n_params: Optional[int] = None,
                  # Ansatz-based construction
                  ansatz: Optional[Ansatz] = None,
                  # Custom circuit construction (backward compatible)
@@ -53,19 +43,14 @@ class QuantumLayer(nn.Module):
                  trainable_parameters: List[str] = [],
                  input_parameters: List[str] = [],
                  # Common parameters
-                 output_mapping_strategy: Optional[OutputMappingStrategy] = None,
+                 output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.LINEAR,
                  device: Optional[torch.device] = None,
                  dtype: Optional[torch.dtype] = None,
                  shots: int = 0,
                  sampling_method: str = 'multinomial',
                  no_bunching: bool = True,
                  # New parameter for constrained photon placement
-                 index_photons: Optional[List[Tuple[int, int]]] = None,
-                 # Simple mode specific defaults (NEW!)
-                 circuit_type: CircuitType = CircuitType.SERIES,
-                 reservoir_mode: bool = False,
-                 use_bandwidth_tuning: bool = False,
-                 state_pattern: StatePattern = StatePattern.PERIODIC):
+                 index_photons: Optional[List[Tuple[int, int]]] = None):
 
         super().__init__()
 
@@ -74,195 +59,28 @@ class QuantumLayer(nn.Module):
         self.input_size = input_size
         self.no_bunching = no_bunching
         self.index_photons = index_photons
-        
 
         # Determine construction mode
-        if n_params is not None and ansatz is None and circuit is None:
-            # NEW: Simple mode
-            if self.index_photons is not None:
-                raise ValueError(
-                    "index_photons should not be used with simple mode (n_params). "
-                    "Simple mode abstracts away quantum details. Use ansatz or circuit mode instead."
-                )
-
-            # Default to NONE strategy for simple mode
-            if output_mapping_strategy is None:
-                output_mapping_strategy = OutputMappingStrategy.NONE
-
-            ansatz = self._create_default_ansatz(
-                input_size, n_params, circuit_type, reservoir_mode,
-                use_bandwidth_tuning, state_pattern, output_mapping_strategy,
-                n_photons
-            )
-            self._init_from_ansatz(ansatz, output_size, output_mapping_strategy)
-        elif ansatz is not None:
-            # Ansatz mode - use LINEAR as default if not specified
-            if output_mapping_strategy is None:
-                output_mapping_strategy = OutputMappingStrategy.LINEAR
+        if ansatz is not None:
             self._init_from_ansatz(ansatz, output_size, output_mapping_strategy)
         elif circuit is not None:
-            # Custom mode - use LINEAR as default if not specified
-            if output_mapping_strategy is None:
-                output_mapping_strategy = OutputMappingStrategy.LINEAR
             self._init_from_custom_circuit(
                 circuit, input_state, n_photons, trainable_parameters,
                 input_parameters, output_size, output_mapping_strategy
             )
         else:
-            raise ValueError("Must provide either 'n_params' (simple mode), 'ansatz', or 'circuit'")
+            raise ValueError("Either 'ansatz' or 'circuit' must be provided")
 
         # Setup sampling
         self.autodiff_process = AutoDiffProcess()
         self.shots = shots
         self.sampling_method = sampling_method
 
-    # NEW: Helper methods for simple mode
-    @staticmethod
-    def _infer_modes_from_params(input_size: int, n_params: int, circuit_type: CircuitType) -> int:
-        """
-        Infer the number of modes needed based on parameter count.
-        For SERIES circuit: n_params = 2 * (n_modes + 1)^2
-        """
-        if circuit_type == CircuitType.SERIES:
-            # Solve: n_params = 2 * (n_modes + 1)^2
-            ideal_modes = math.sqrt(n_params / 2) - 1
-        else:
-            # For other circuit types, use a heuristic
-            ideal_modes = math.sqrt(n_params / 4)  # Rough estimate
-
-        # Round to nearest integer, ensure minimum modes
-        n_modes = max(int(round(ideal_modes)), input_size + 1)
-
-        # Verify the parameter count is reasonable
-        if circuit_type == CircuitType.SERIES:
-            actual_params = 2 * (n_modes + 1) ** 2
-            if abs(actual_params - n_params) > n_params * 0.1:  # Allow 10% tolerance
-                print(f"Warning: Requested {n_params} parameters, but {n_modes} modes gives {actual_params} parameters")
-
-        return n_modes
-
-
-
-    @staticmethod
-    def _create_periodic_state(n_modes: int, n_photons: Optional[int] = None) -> List[int]:
-        """
-        Create a periodic state pattern like 10100 for 5 modes.
-        If n_photons not specified, uses n_modes // 2.
-        """
-        if n_photons is None:
-            n_photons = n_modes // 2
-
-        state = [0] * n_modes
-        for i in range(n_photons):
-            state[i * 2 % n_modes] = 1
-
-        return state
-
-    def _create_default_ansatz(self, input_size: int, n_params: int,
-                               circuit_type: CircuitType,
-                               reservoir_mode: bool,
-                               use_bandwidth_tuning: bool,
-                               state_pattern: StatePattern,
-                               output_mapping_strategy: Optional[OutputMappingStrategy],
-                               n_photons: Optional[int] = None) -> Ansatz:
-        """Create a default ansatz based on simple parameters."""
-
-        # Infer number of modes
-        n_modes = self._infer_modes_from_params(input_size, n_params, circuit_type)
-
-        # Determine number of photons
-        if n_photons is not None:
-            # Explicit photon count provided
-            actual_n_photons = n_photons
-        else:
-            # Default: use half the modes
-            actual_n_photons = n_modes // 2
-
-        # Calculate actual parameter count for the circuit
-        if circuit_type == CircuitType.SERIES:
-            actual_params = 2 * (n_modes + 1) ** 2
-            # Additional parameters from input encoding
-            encoding_params = input_size * n_modes  # Phase shifters for input encoding
-            total_params = actual_params + encoding_params
-
-            print(f"\nCreating quantum layer:")
-            print(f"  Modes: {n_modes}, Photons: {actual_n_photons}")
-            print(f"  Circuit parameters: {actual_params}")
-            print(f"  Input encoding parameters: {encoding_params}")
-            print(f"  Total trainable parameters: {total_params}")
-
-            if abs(total_params - n_params) > n_params * 0.1:
-                print(f"  WARNING: Requested {n_params} parameters, but actual count is {total_params}")
-                print(f"  For SERIES circuits: parameters = 2*(n_modes+1)² + input_size*n_modes")
-        else:
-            print(f"Creating quantum layer: {n_modes} modes, {actual_n_photons} photons")
-
-        # Create experiment - let it handle the state creation
-        experiment = Experiment(
-            circuit_type=circuit_type,
-            n_modes=n_modes,
-            n_photons=actual_n_photons,
-            reservoir_mode=reservoir_mode,
-            use_bandwidth_tuning=use_bandwidth_tuning,
-            state_pattern=state_pattern
-        )
-
-        # Create ansatz
-        ansatz = AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=input_size,
-            output_mapping_strategy=output_mapping_strategy or OutputMappingStrategy.NONE
-        )
-
-        return ansatz
-
-    # NEW: Convenience class methods
-    @classmethod
-    def simple(cls, input_size: int, n_params: int = None, **kwargs):
-        """
-        Convenience constructor for simple quantum layer creation.
-
-        Examples:
-            >>> # Create with default parameters
-            >>> qlayer = QuantumLayer.simple(input_size=3)
-
-            >>> # Create with specific parameter count
-            >>> qlayer = QuantumLayer.simple(input_size=3, n_params=100)
-
-            >>> # Create with custom options
-            >>> qlayer = QuantumLayer.simple(
-            ...     input_size=3,
-            ...     n_params=100,
-            ...     reservoir_mode=True,
-            ...     shots=10000
-            ... )
-        """
-        if n_params is None:
-            # Default: create a reasonably sized circuit
-            # For input_size=3, this gives 5 modes and 50 parameters
-            n_params = 2 * (input_size + 2) ** 2
-
-        return cls(input_size=input_size, n_params=n_params, **kwargs)
-
-    # All existing methods remain unchanged below this point
     def _init_from_ansatz(self, ansatz: Ansatz, output_size: Optional[int],
                           output_mapping_strategy: OutputMappingStrategy):
         """Initialize from ansatz (auto-generated mode)."""
         self.ansatz = ansatz
         self.auto_generation_mode = True
-
-        # Compute output size if not specified
-        if output_size is None and hasattr(ansatz, 'experiment'):
-            from math import comb
-            n_modes = ansatz.experiment.n_modes
-            n_photons = ansatz.experiment.n_photons
-
-            if self.no_bunching:
-                # No bunching: C(n_modes, n_photons)
-                output_size = comb(n_modes, n_photons)
-            else:
-                # With bunching: C(n_modes + n_photons - 1, n_photons)
-                output_size = comb(n_modes + n_photons - 1, n_photons)
 
         # For ansatz mode, we need to create a new computation process with index_photons
         if self.index_photons is not None:
@@ -280,17 +98,7 @@ class QuantumLayer(nn.Module):
             )
         else:
             # Use the ansatz's computation process as before
-            self.computation_process = ComputationProcessFactory.create(
-                circuit=ansatz.circuit,
-                input_state=ansatz.input_state,
-                trainable_parameters=ansatz.trainable_parameters,
-                input_parameters=ansatz.input_parameters,
-                reservoir_mode=ansatz.experiment.reservoir_mode,
-                device=self.device,
-                dtype=self.dtype,
-                no_bunching=self.no_bunching,
-                index_photons=self.index_photons
-            )
+            self.computation_process = ansatz.computation_process
 
         self.feature_encoder = ansatz.feature_encoder
 
@@ -544,8 +352,8 @@ class QuantumLayer(nn.Module):
                 self.bandwidth_coeffs
             )
         else:
-            # For custom circuits
-            return x
+            # For custom circuits, apply 2π scaling directly
+            return x * torch.pi
 
     def prepare_parameters(self, input_parameters: List[torch.Tensor]) -> List[torch.Tensor]:
         """Prepare parameter list for circuit evaluation."""
@@ -613,6 +421,7 @@ class QuantumLayer(nn.Module):
             self.sampling_method = method
 
     def to(self, *args, **kwargs):
+
         super().to(*args, **kwargs)
         # Manually move any additional tensors
         device = kwargs.get('device', None)
@@ -652,35 +461,80 @@ class QuantumLayer(nn.Module):
 
         return info
 
-    # NEW: Enhanced info method
-    def get_circuit_info(self) -> dict:
-        """Get detailed information about the quantum circuit configuration."""
-        info = {
-            'input_size': self.input_size,
-            'output_size': self.output_size,
-            'construction_mode': 'auto' if self.auto_generation_mode else 'custom',
-            'shots': self.shots,
-            'sampling_method': self.sampling_method,
-            'no_bunching': self.no_bunching
-        }
+    @classmethod
+    def simple(cls, input_size: int, n_params: int = 100,
+               shots: int = 0, reservoir_mode: bool = False,
+               output_size: Optional[int] = None,
+               output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.NONE,
+               device: Optional[torch.device] = None,
+               dtype: Optional[torch.dtype] = None,
+               no_bunching: bool = True):
+        """
+        Simplified interface for creating a QuantumLayer.
 
-        if self.auto_generation_mode:
-            info.update({
-                'circuit_type': self.ansatz.experiment.circuit_type.value,
-                'n_modes': self.ansatz.experiment.n_modes,
-                'n_photons': self.ansatz.experiment.n_photons,
-                'input_state': self.ansatz.input_state,
-                'reservoir_mode': self.ansatz.experiment.reservoir_mode,
-                'use_bandwidth_tuning': self.ansatz.experiment.use_bandwidth_tuning,
-                'n_parameters': sum(p.numel() for p in self.parameters() if p.requires_grad),
-                'output_mapping_strategy': self.ansatz.output_mapping_strategy.value
-            })
+        Uses SERIES circuit type with PERIODIC state pattern as defaults.
+        Automatically calculates the number of modes based on n_params.
 
-        if self.index_photons is not None:
-            info['index_photons'] = self.index_photons
+        Args:
+            input_size (int): Size of the input vector
+            n_params (int): Total number of parameters desired (default: 100)
+                Formula: n_params = 2 * n_modes^2
+            shots (int): Number of shots for sampling (default: 0)
+            reservoir_mode (bool): Whether to use reservoir mode (default: False)
+            output_size (int, optional): Output dimension. If None, uses distribution size
+            output_mapping_strategy: How to map quantum output to classical output
+            device: PyTorch device
+            dtype: PyTorch dtype
+            no_bunching: Whether to exclude states with multiple photons per mode
 
-        return info
+        Returns:
+            QuantumLayer: Configured quantum layer instance
+        """
+        # Calculate minimum modes needed based on n_params
+        # n_params = 2 * n_modes^2, so n_modes = sqrt(n_params / 2)
+        min_modes_from_params = int(math.ceil(math.sqrt(n_params / 2)))
 
+        # Ensure we have at least input_size + 1 modes
+        n_modes = max(min_modes_from_params, input_size + 1)
+
+        # Number of photons equals input_size
+        n_photons = input_size
+
+        # Create experiment configuration
+        experiment = Experiment(
+            circuit_type=CircuitType.SERIES,  # Default to SERIES
+            n_modes=n_modes,
+            n_photons=n_photons,
+            reservoir_mode=reservoir_mode,
+            use_bandwidth_tuning=False,  # Keep simple by default
+            state_pattern=StatePattern.PERIODIC  # Default to PERIODIC
+        )
+
+        # Create ansatz using AnsatzFactory
+        ansatz = AnsatzFactory.create(
+            PhotonicBackend=experiment,
+            input_size=input_size,
+            output_size=output_size,  # Can be None for automatic calculation
+            output_mapping_strategy=output_mapping_strategy,
+            dtype=dtype,
+            device= device
+        )
+
+        # IMPORTANT: Override the ansatz's output_mapping_strategy to ensure our parameter is used
+        # This is necessary because _init_from_ansatz uses ansatz.output_mapping_strategy
+        ansatz.output_mapping_strategy = output_mapping_strategy
+
+        # Create and return the QuantumLayer instance
+        return cls(
+            input_size=input_size,
+            output_size=output_size,
+            ansatz=ansatz,
+            output_mapping_strategy=output_mapping_strategy,
+            shots=shots,
+            no_bunching=no_bunching,
+            device= device,
+            dtype= dtype
+        )
     def __str__(self) -> str:
         """String representation of the quantum layer."""
         base_str = ""
