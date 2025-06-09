@@ -1,6 +1,6 @@
 wheel
 sphinx==6.2.1
-renku-sphinx-theme
+sphinx_rtd_theme
 sphinxcontrib-bibtex
 sphinx_autodoc_typehints
 enum-tools[sphinx]
@@ -10,5 +10,3 @@ ipython
 ipykernel
 gitpython
 git+https://github.com/Quandela/sphinx-multiversion-contrib.git@1.1.1
-scikit-learn>=1.0.0
--e ..
