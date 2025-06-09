@@ -142,7 +142,7 @@ Performance Analysis
 Interactive Exploration
 =======================
 
-**Jupyter Notebook**: :doc:`../notebooks/[notebook_name]`
+**Jupyter Notebook**: _[LINK TO NOTEBOOK]_
 
 The notebook provides:
 

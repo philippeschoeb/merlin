@@ -10,5 +10,5 @@ Reference
    :maxdepth: 2
    :caption: Table of Contents
 
-   api
+   api/modules
    performance
