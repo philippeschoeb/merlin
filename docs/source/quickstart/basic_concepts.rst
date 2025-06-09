@@ -96,7 +96,7 @@ Basic Encoding Process
 
 **Key Steps**:
 
-1. **Normalization**: Ensure inputs are in \([0,1]\) range
+1. **Normalization**: Ensure inputs are in :math:`[0,1]` range
 2. **Scaling**: Apply scaling for quantum parameter ranges
 3. **Circuit Mapping**: Distribute to quantum parameters based on ansatz
 
@@ -104,15 +104,15 @@ Amplitude encoding Process
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Amplitude encoding** maps classical data values to the amplitudes of a quantum state.
-Given a normalized vector \(x = (x_0, x_1, ..., x_{2^n-1})\), the encoding creates
-a quantum state \(|psi\gt = sum_i x_i |i>\) where \(|i\gt\) represents the computational basis state.
-This technique requires n qubits to encode \(2^n\) data points, offering exponential
+Given a normalized vector :math:`x = (x_0, x_1, ..., x_{2^n-1})`, the encoding creates
+a quantum state :math:`|\psi\gt = \sum_i x_i |i\gt` where :math:`|i\gt` represents the computational basis state.
+This technique requires n qubits to encode :math:`2^n` data points, offering exponential
 compression but requiring complex state preparation circuits, unless the state can be prepared at source.
 
 
 **Key Steps**:
 
-1. **Normalization**: Ensure inputs are in \([0,1]\) range
+1. **Normalization**: Ensure inputs are in :math:`[0,1]` range
 2. **Scaling**: Apply scaling for quantum parameter ranges
 3. **Circuit Mapping**: Distribute to quantum parameters based on ansatz
 
@@ -164,7 +164,7 @@ The **QuantumLayer** combines all these concepts into a PyTorch-compatible inter
         circuit=circuit,                                           # Photonic backend + ansatz
         trainable_parameters=["theta"],                            # Which parameters to train
         input_parameters=["px"],                                   # Encoding parameters
-        input_state=[1, 0, 1, 0, 1, 0],                          # Initial photon state
+        input_state=[1, 0, 1, 0, 1, 0],                            # Initial photon state
         output_mapping_strategy=ML.OutputMappingStrategy.LINEAR    # Output mapping choice
     )
 
@@ -178,11 +178,11 @@ For most users, Merlin provides a simplified interface that handles these comple
     # Simple experiment configuration
     experiment = ML.Experiment(
         circuit_type=ML.CircuitType.SERIES,                    # Ansatz choice
-        n_modes=4,                                              # Circuit size
-        n_photons=2,                                            # Quantum resource
+        n_modes=4,                                             # Circuit size
+        n_photons=2,                                           # Quantum resource
         state_pattern=ML.StatePattern.PERIODIC,                # Encoding strategy
-        use_bandwidth_tuning=True,                              # Learnable encoding
-        reservoir_mode=False                                    # Full training vs reservoir
+        use_bandwidth_tuning=True,                             # Learnable encoding
+        reservoir_mode=False                                   # Full training vs reservoir
     )
 
     # Creates quantum layer automatically
@@ -213,10 +213,10 @@ Here's how all these concepts work together in practice:
             # Quantum processing layer
             experiment = ML.Experiment(
                 circuit_type=ML.CircuitType.SERIES,        # Ansatz: balanced complexity
-                n_modes=6,                                  # Photonic backend: 6 modes
-                n_photons=2,                                # 2 photons for interference
+                n_modes=6,                                 # Photonic backend: 6 modes
+                n_photons=2,                               # 2 photons for interference
                 state_pattern=ML.StatePattern.PERIODIC,    # Encoding: alternating photons
-                use_bandwidth_tuning=True                   # Learnable encoding scaling
+                use_bandwidth_tuning=True                  # Learnable encoding scaling
             )
 
             self.quantum_layer = experiment.create_layer(
@@ -248,10 +248,12 @@ When choosing configurations, consider these general principles:
 **Start Simple**: Begin with default settings (SERIES ansatz, LINEAR output mapping) and adjust based on performance.
 
 **Match Complexity to Problem**:
+
 - Simple problems → PARALLEL ansatz, smaller circuits
 - Complex problems → SERIES or PARALLEL_COLUMNS ansatz, larger circuits
 
 **Computational Constraints**:
+
 - Limited resources → smaller circuits, PARALLEL ansatz
 - More resources available → larger circuits, more expressive ansatz
 
