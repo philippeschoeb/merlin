@@ -37,7 +37,7 @@ Available Reproductions
    * - :doc:`reproductions/fock_state_expressivity`
      - Gan et al.
      - 2021
-     - Complete
+     - In Progress
      - Foundational work on photonic circuit architectures
    * - :doc:`reproductions/quantum_reservoir_computing`
      - Sakurai et al.
