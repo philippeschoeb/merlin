@@ -35,14 +35,14 @@ We have used the ``pyNVML`` library for memory monitoring (`documentation <https
 -------------------
 First, we analyze the performance needed to train an interferometer with ``m`` modes using ``m//2`` photons for ``m`` from 2 to 24 and varying the batch size from 1 to 2048.
 
-.. image:: img/SW-BS.png
+.. image:: ../_static/img/SW-BS.png
    :alt: Memory usage with respect to different batch sizes for m-mode interferometers with m/2 photons
    :width: 600px
    :align: center
 
 Then, we analyze the performance needed to train m-mode interferometers with 1 to ``m//2`` photons for ``batch_size=1``:
 
-.. image:: img/SW-photons.png
+.. image:: ../_static/img/SW-photons.png
    :alt: Memory usage with respect to different number of photons, for different sizes of interferometers
    :width: 600px
    :align: center
@@ -55,21 +55,21 @@ Time Performance
 
 Here, we compare the average time required for different operations on the H100 GPU. First, we display the computation time needed for the ``QuantumLayer`` with varying numbers of photons:
 
-.. image:: img/SW-layer-photons.png
+.. image:: ../_static/img/SW-layer-photons.png
    :alt: Compilation time for the ``QuantumLayer`` with different numbers of photons
    :width: 600px
    :align: center
 
 Next, we compare forward and backward pass times for different numbers of photons:
 
-.. image:: img/SW-times-photons.png
+.. image:: ../_static/img/SW-times-photons.png
    :alt: Forward and Backward times for the ``QuantumLayer`` with different numbers of photons
    :width: 600px
    :align: center
 
 And then, we compare forward and backward pass times for different batch sizes:
 
-.. image:: img/SW-times.png
+.. image:: ../_static/img/SW-times.png
    :alt: Forward and Backward times for the ``QuantumLayer`` for different ``batch_sizes``
    :width: 600px
    :align: center
@@ -82,7 +82,7 @@ Pushing the H100 to its limits
 
 We increase the number of modes from 50 to 350 and we vary the number of photons from 1 to 3 with a batch size of 1 to observe GPU performance with a high number of modes:
 
-.. image:: img/SW-few-photons.png
+.. image:: ../_static/img/SW-few-photons.png
    :alt: Memory usage for the m-mode interferometer with respect to the number of photons
    :width: 600px
    :align: center
