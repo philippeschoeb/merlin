@@ -8,9 +8,9 @@ MerLin brings quantum computing capabilities to AI practitioners through easy-to
 
 **Key Goals:**
 
-- **Paper Reproduction**: Simple tools to reproduce published quantum ML papers and benchmark algorithms - see our [reproduced papers](https://merlinquantum.ai/research/reproduced_papers) list.
-- **Quantum Architecture Bridge**: Access to latest and next-gen quantum photonic architectures as a bridge between AI and quantum worlds - see our [quantum architectures](https://merlinquantum.ai/research/reproduced_papers).
-- **GPU-Optimized Performance**: Fast simulation scaling up to 500+ mode chips with 10-20 photons near the simulability threshold - see [performance benchmarks](https://merlinquantum.ai/reference/performance).
+- **Paper Reproduction**: Simple tools to reproduce published quantum ML papers and benchmark algorithms - see our [reproduced papers](https://merlinquantum.ai/research/reproduced_papers.html) list.
+- **Quantum Architecture Bridge**: Access to latest and next-gen quantum photonic architectures as a bridge between AI and quantum worlds - see our [quantum architectures](https://merlinquantum.ai/research/architectures.html).
+- **GPU-Optimized Performance**: Fast simulation scaling up to 500+ mode chips with 10-20 photons near the simulability threshold - see [performance benchmarks](https://merlinquantum.ai/reference/performance.html).
 
 Together, these provide researchers with comprehensive tools for exploring and developing new quantum-classical hybrid algorithms.
 
@@ -59,7 +59,7 @@ integrated into any PyTorch model, and supports usual PyTorch operations like tr
    print(f"Input shape: {x.shape}, Output shape: {output.shape}")
 ```
 
-Under the hood, this simple interface wraps complex photonic quantum operations — including architecture selection, ansatz design, input encoding, and photon number configuration. Learn more in our [Quantum Layer Design Guide](https://merlinquantum.ai/quantumlayers).
+Under the hood, this simple interface wraps complex photonic quantum operations — including architecture selection, ansatz design, input encoding, and photon number configuration. Learn more in our [User Guide](https://merlinquantum.ai/user_guide/index.html).
 
 ## Learn More
 
@@ -85,11 +85,11 @@ We welcome contributions! Here's how to get started:
 3. **Test** your changes: ``pytest tests/``
 4. **Submit** a pull request
 
-See our [Contributing Guide](./CONTRIBUTING.md) for detailed guidelines.
+See our [Contributing Guide](https://github.com/merlinquantum/merlin/blob/main/CONTRIBUTING.md) for detailed guidelines.
 
 ## License
 
-MIT License - see [LICENSE](./LICENSE) for details.
+MIT License - see [LICENSE](https://github.com/merlinquantum/merlin/blob/main/LICENSE) for details.
 
 ## Support
 
