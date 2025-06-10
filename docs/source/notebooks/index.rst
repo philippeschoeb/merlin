@@ -16,4 +16,5 @@ Notebooks
    VQC_implementation
    expressive_power_of_the_VQC
    gaussian_kernel_with_quantum
+   img2img_turbo_annotations/src_quantum/Train_cyclegan_notebook
 
