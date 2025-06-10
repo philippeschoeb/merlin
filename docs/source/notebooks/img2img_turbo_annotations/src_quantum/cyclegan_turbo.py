@@ -11,7 +11,7 @@ import time
 
 p = "src/"
 sys.path.append(p)
-from model import make_1step_sched, my_vae_encoder_fwd, my_vae_decoder_fwd, download_url
+from img2img_turbo_annotations.src_quantum.model import make_1step_sched, my_vae_encoder_fwd, my_vae_decoder_fwd, download_url
 
 
 class VAE_encode(nn.Module):
