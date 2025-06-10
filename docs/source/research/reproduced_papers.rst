@@ -50,6 +50,12 @@ Available Reproductions
      - In Progress
      - Fine Tuning a LLM with a photonic neural network
 
+   * - :doc:`reproductions/hqnn_spiral`
+     - Kashif et al.
+     - 2024
+     - In Progress
+     - Benchmarking HQNN on the Spiral dataset
+
 Contributing Reproductions
 ==========================
 
@@ -114,6 +120,7 @@ Upcoming Reproductions
    reproductions/quantum_reservoir_computing
    reproductions/template
    reproductions/qllm_finetuning
+   reproductions/hqnn_spiral
 
 ----
 
