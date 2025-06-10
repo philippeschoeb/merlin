@@ -80,16 +80,6 @@ extensions = [
     "sphinx_multiversion",
 ]
 
-mathjax3_config = {
-    'tex': {
-        'inlineMath': [['$', '$'], ['\\(', '\\)']],
-        'displayMath': [['$$', '$$'], ['\\[', '\\]']],
-    },
-    'svg': {
-        'fontCache': 'global'
-    }
-}
-
 suppress_warnings = ['autosectionlabel.*']
 bibtex_bibfiles = ["references.bib"]
 bibtex_reference_style = "author_year"
