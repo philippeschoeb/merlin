@@ -451,14 +451,40 @@ class SLOSComputeGraph:
                         probabilities
                     )
             keys = self.final_keys if self.keep_keys else None
-
-        # Remove batch dimension if input was single unitary
+        #Remove batch dimension if input was single unitary
         if not is_batched:
             probabilities = probabilities.squeeze(0)
 
         return keys, probabilities
 
 
+
+    def to(self, dtype: torch.dtype, device: str | torch.device):
+        """
+        Moves the converter to a specific device.
+
+        :param dtype: The data type to use for the tensors - one can specify either a float or complex dtype.
+                      Supported dtypes are torch.float32 or torch.complex64, torch.float64 or torch.complex128.
+        :param device: The device to move the converter to.
+        """
+        if isinstance(device, str):
+            self.device = torch.device(device)
+        elif isinstance(device, torch.device):
+            self.device = device
+        else:
+            raise TypeError(f"Expected a string or torch.device, but got {type(device).__name__}")
+        if dtype not in (torch.float32, torch.float64, torch.complex64, torch.complex128):
+            raise TypeError(f"Unsupported dtype {dtype}. Supported dtypes are torch.float32, torch.float64, "
+                            f"torch.complex64, and torch.complex128.")
+        if self.output_map_func is not None:
+            self.target_indices.to(dtype=dtype, device=self.device)
+        for idx, (sources, destinations, modes) in enumerate(self.vectorized_operations):    
+            self.vectorized_operations[idx] = (sources.to(dtype=dtype, device=self.device), 
+                                                   destinations.to(dtype=dtype, device=self.device),
+                                                   modes.to(dtype=dtype, device=self.device))
+
+
+        return self
 
 
     def compute_pa_inc(self, unitary: torch.Tensor,
