@@ -3,9 +3,9 @@
 MerLin - Photonic Quantum Machine Learning Framework
 ====================================================
 
-MerLin is a quantum ML framework designed specifically for photonic quantum computing, leveraging the unique properties of single-photon based quantum systems. Named after the legendary wizard, MerLin brings *quantum wizardry to AI practitioners* through hardware-aware abstractions that work today while preparing for tomorrow's photonic devices.
+MerLin brings quantum computing capabilities to AI practitioners through easy-to-use PyTorch integrations. Named after the legendary wizard, MerLin adds quantum wizardry to your AI toolkit with no quantum expertise required.
 
-**No quantum expertise needed** - designed for AI/ML practitioners. Advanced users can leverage the underlying `Perceval <https://perceval.quandela.net>`_ framework for custom models or advanced functionality.
+**Built for AI/ML practitioners**: MerLin is designed to feel familiar to PyTorch users while unlocking the potential of quantum computing. Under the hood, it leverages photonic quantum computing - a cutting-edge approach using single-photons that's hardware-aware and prepares your models for real quantum processors.
 
 **Simulation-first with hardware bridges**: Optimized for classical simulation today, with connections to currently available photonic QPUs and pathways to next-generation quantum hardware.
 
@@ -19,9 +19,10 @@ Together, these provide researchers with comprehensive tools for exploring and d
 
 **Why Quantum Layers?** Enable non-conventional operations in hybrid workflows that can help classical ML models improve performance, learn faster, or use fewer parameters.
 
+Advanced users can leverage the underlying `Perceval <https://perceval.quandela.net>`_ framework for custom models or advanced functionality.
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
    :hidden:
 
    Welcome <self>
@@ -80,7 +81,6 @@ Under the hood, this simple interface wraps complex photonic quantum operations 
 Learn More
 ==========
 
-- **Documentation**: `merlinquantum.ai <https://merlinquantum.ai/>`_
 - **Examples**: Check the ``examples/`` directory for tutorials
 - **Notebooks**: Explore ``docs/source/notebooks/`` for interactive examples
 
