@@ -13,5 +13,4 @@ Quickstart
    installation
    basic_concepts
    first_quantum_layer
-   other_circuits
 

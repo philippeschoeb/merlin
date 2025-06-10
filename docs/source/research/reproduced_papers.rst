@@ -44,6 +44,11 @@ Available Reproductions
      - 2025
      - In Progress
      - Boson sampling for quantum reservoir computing
+   * - :doc:`reproductions/qllm_finetuning`
+     - Jern et al.
+     - 2025
+     - In Progress
+     - Fine Tuning a LLM with a photonic neural network
 
 Contributing Reproductions
 ==========================
@@ -59,11 +64,11 @@ We welcome contributions of additional paper reproductions!
 
 **Submission Process**:
 
-1. **Propose** the paper in our `GitHub Discussions <https://github.com/merlinquantum/merlin/discussions>`
+1. **Propose** the paper in our `GitHub Discussions <https://github.com/merlinquantum/merlin/discussions>`_
 2. **Implement** using MerLin following our guidelines
 3. **Validate** results against original paper
 4. **Document** in Jupyter notebook format
-5. **Submit** via pull request a complete reproduction folder and a summary page in `docs/source/reproductions/` directory
+5. **Submit** via pull request a complete reproduction folder and a summary page in :code:`docs/source/reproductions/` directory
 
 **Template Structure**:
 
@@ -98,7 +103,7 @@ Upcoming Reproductions
   *Community voting in progress*
 
 **Community Requested**:
-  Vote on upcoming reproductions in our `GitHub Discussions <https://github.com/merlinquantum/merlin/discussions/categories/paper-requests>`.
+  Vote on upcoming reproductions in our `paper requests discussions <https://github.com/merlinquantum/merlin/discussions/categories/paper-requests>`_.
 
 .. toctree::
    :maxdepth: 2
@@ -107,7 +112,9 @@ Upcoming Reproductions
 
    reproductions/fock_state_expressivity
    reproductions/quantum_reservoir_computing
+   reproductions/template
+   reproductions/qllm_finetuning
 
 ----
 
-*Have a paper you'd like to see reproduced? `Start a discussion <https://github.com/merlinquantum/merlin/discussions/new>` and let us know!*
+*Have a paper you'd like to see reproduced?* `Start a discussion <https://github.com/merlinquantum/merlin/discussions/new>`_ *and let us know!*

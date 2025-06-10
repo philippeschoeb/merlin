@@ -30,7 +30,7 @@ Significance
 [Why is this paper important? What gap does it fill? How does it advance the field?]
 
 MerLin Implementation
-====================
+=====================
 
 [Brief overview of how the paper is implemented in MerLin. What specific MerLin components are used? Any special considerations or adaptations made?]
 
@@ -142,7 +142,7 @@ Performance Analysis
 Interactive Exploration
 =======================
 
-**Jupyter Notebook**: :doc:`../notebooks/[notebook_name]`
+**Jupyter Notebook**: _[LINK TO NOTEBOOK]_
 
 The notebook provides:
 

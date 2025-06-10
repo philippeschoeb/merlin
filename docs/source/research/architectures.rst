@@ -6,8 +6,8 @@ Quantum Architectures
 
 Behind the scenes of any module in MerLin, there is a quantum architecture that provides the underlying computation framework.
 This section provides a technical overview of the quantum architectures that power MerLin's quantum layers.
-W
-hile MerLin handles these complexities automatically, understanding these concepts helps you:
+
+While MerLin handles these complexities automatically, understanding these concepts helps you:
 
 * Make informed architecture choices for your quantum layers
 * Debug and optimize quantum model performance
@@ -98,7 +98,7 @@ Fock States and Entanglement
 ============================
 
 Photonic quantum computing uses **Fock states** to represent quantum information.
-A Fock state specifies the exact number of photons in each mode, such as |1,0,2⟩ (1 photon in mode 0, none in mode 1, 2 in mode 2).
+A Fock state specifies the exact number of photons in each mode, such as :math:`|1,0,2\gt` (1 photon in mode 0, none in mode 1, 2 in mode 2).
 
 By passing Fock states through interferometers, we can generate **entangled states**, where the photon number distribution across modes becomes correlated.
 
