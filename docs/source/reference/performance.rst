@@ -94,3 +94,9 @@ Now it is your turn !
 ---------------------
 
 Let's push your GPU to its limits ! Follow our code here: `memory_benchmark <https://github.com/merlinquantum/merlin/tree/main/tests/memory_benchmark.py>`_
+
+To benchmark on your GPU, simply run:
+
+.. code-block:: bash
+
+   python3 ./docs/source/reference/memory_benchmark.py --modes 16 --photons 8 --bs 64 --type torch.float64
