@@ -76,7 +76,7 @@ integrated into any PyTorch model, and supports usual PyTorch operations like tr
    output = quantum_layer(x)
    print(f"Input shape: {x.shape}, Output shape: {output.shape}")
 
-Under the hood, this simple interface wraps complex photonic quantum operations — including architecture selection, ansatz design, input encoding, and photon number configuration. Learn more in our :doc:`User Guide </user_guide>`.
+Under the hood, this simple interface wraps complex photonic quantum operations — including architecture selection, ansatz design, input encoding, and photon number configuration. Learn more in our :doc:`User Guide </user_guide/index>`.
 
 Learn More
 ==========
