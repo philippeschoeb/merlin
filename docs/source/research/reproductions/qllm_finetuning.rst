@@ -116,6 +116,7 @@ Future Work
 =====================
 
 **Future Work** includes:
+
 * thorough comparison of the performances with respect to the number of parameters;
 * analysis of the effect of the number of photons
 * experiments on SetFit using more than 2 classes for more complex classification
