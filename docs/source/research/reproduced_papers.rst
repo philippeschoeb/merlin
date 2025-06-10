@@ -117,4 +117,4 @@ Upcoming Reproductions
 
 ----
 
-*Have a paper you'd like to see reproduced? `Start a discussion <https://github.com/merlinquantum/merlin/discussions/new>`_ and let us know!*
+*Have a paper you'd like to see reproduced?* `Start a discussion <https://github.com/merlinquantum/merlin/discussions/new>`_ *and let us know!*
