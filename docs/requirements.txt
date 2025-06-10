@@ -1,6 +1,6 @@
 wheel
 sphinx==6.2.1
-sphinx_rtd_theme
+renku-sphinx-theme
 sphinxcontrib-bibtex
 sphinx_autodoc_typehints
 enum-tools[sphinx]
