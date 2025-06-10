@@ -153,46 +153,6 @@ Simple direct encoding:
 Selection Guidelines
 ====================
 
-Dataset Size Considerations
----------------------------
-
-.. list-table::
-   :header-rows: 1
-   :widths: 20 30 50
-
-   * - Dataset Size
-     - Recommended Circuit
-     - Reasoning
-   * - <100 samples
-     - PARALLEL
-     - Avoid overfitting
-   * - 100-1000 samples
-     - SERIES
-     - Balanced complexity
-   * - >1000 samples
-     - PARALLEL_COLUMNS
-     - Can handle complexity
-
-Feature Dimensionality
-----------------------
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 35 40
-
-   * - Feature Count
-     - Primary Recommendation
-     - Alternative
-   * - 1-5 features
-     - PARALLEL
-     - SERIES
-   * - 6-20 features
-     - SERIES
-     - PARALLEL_COLUMNS
-   * - 21+ features
-     - PARALLEL_COLUMNS
-     - SERIES with bandwidth tuning
-
 Task Complexity
 ---------------
 
@@ -287,59 +247,6 @@ Relative training time for 1000 samples, 4 modes, 2 photons:
      - 2.5-4.0x
      - High
 
-Gradient Flow Analysis
-----------------------
-
-**PARALLEL_COLUMNS**:
-
-- Rich gradient landscape
-- May require gradient clipping
-- Benefits from bandwidth tuning
-
-**SERIES**:
-
-- Moderate gradient complexity
-- Generally stable training
-- Good convergence properties
-
-**PARALLEL**:
-
-- Simple gradient structure
-- Fast convergence
-- Stable training dynamics
-
-Experimental Validation
-=======================
-
-Benchmark Results
------------------
-
-Performance on standard datasets (accuracy +/- standard deviation):
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 25 25 25
-
-   * - Dataset
-     - PARALLEL
-     - SERIES
-     - PARALLEL_COLUMNS
-   * - Iris (150 samples)
-     - 94.7 +/- 2.1%
-     - 96.0 +/- 1.8%
-     - 93.3 +/- 3.2%
-   * - Wine (178 samples)
-     - 92.1 +/- 2.8%
-     - 94.5 +/- 2.1%
-     - 95.2 +/- 1.9%
-   * - Breast Cancer (569 samples)
-     - 93.8 +/- 1.7%
-     - 95.1 +/- 1.4%
-     - 96.7 +/- 1.2%
-   * - Digits (1797 samples)
-     - 89.3 +/- 2.3%
-     - 92.1 +/- 1.9%
-     - 94.8 +/- 1.6%
 
 Hybrid Approaches
 =================
@@ -394,28 +301,6 @@ Start with simple circuits and increase complexity:
 
 Troubleshooting Circuit Selection
 =================================
-
-Common Issues
--------------
-
-**Overfitting with PARALLEL_COLUMNS**:
-
-- Reduce n_modes or n_photons
-- Increase regularization
-- Use dropout in classical layers
-- Switch to SERIES
-
-**Underfitting with PARALLEL**:
-
-- Increase n_modes or n_photons
-- Switch to SERIES or PARALLEL_COLUMNS
-- Add more classical layers
-
-**Slow Training with PARALLEL_COLUMNS**:
-
-- Reduce batch size
-- Use gradient checkpointing
-- Consider SERIES as alternative
 
 Debugging Tools
 ---------------
