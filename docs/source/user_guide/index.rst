@@ -11,6 +11,5 @@ User Guide
    :caption: Table of Contents
 
    circuit_types
-   encoding
    hybrid_models
    output_mappings
