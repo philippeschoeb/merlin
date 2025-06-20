@@ -22,13 +22,20 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
-
-import torch
 import random
 
+import torch
 from multipledispatch import dispatch
-from perceval.components import Circuit, AComponent, PS, BS, PERM, Unitary, Barrier, BSConvention
+from perceval.components import (
+    BS,
+    PERM,
+    PS,
+    AComponent,
+    Barrier,
+    BSConvention,
+    Circuit,
+    Unitary,
+)
 
 SUPPORTED_COMPONENTS = (PS, BS, PERM, Unitary, Barrier)
 
@@ -251,7 +258,7 @@ class CircuitConverter:
     def _compute_tensor(self, comp: AComponent) -> torch.Tensor:
         param_values = []
 
-        for index, param in enumerate(comp.get_parameters(all_params=True)):
+        for _index, param in enumerate(comp.get_parameters(all_params=True)):
             if param.is_variable:
                 (tensor_id, idx_in_tensor) = self.param_mapping[param.name]
                 param_values.append(self.torch_params[tensor_id][..., idx_in_tensor])

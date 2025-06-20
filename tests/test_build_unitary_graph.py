@@ -27,13 +27,10 @@ This module provides comprehensive tests for the circuit compilation and unitary
 functionality, including edge cases, error handling, and performance validation.
 """
 
+
+import perceval as pcvl
 import pytest
 import torch
-import numpy as np
-import perceval as pcvl
-from typing import List, Dict, Any
-import tempfile
-import os
 
 # Import the function under test
 from merlin import CircuitConverter
@@ -355,7 +352,7 @@ class TestIntegration:
         optimizer = torch.optim.Adam([theta_params, phi_params], lr=0.01)
 
         # Simulate a few training steps
-        for step in range(5):
+        for _step in range(5):
             optimizer.zero_grad()
 
             unitary = converter.to_tensor(theta_params, phi_params)

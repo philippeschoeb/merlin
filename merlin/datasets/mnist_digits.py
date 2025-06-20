@@ -20,13 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import numpy as np
-from .utils import fetch, read_idx
-from pathlib import Path
-import pandas as pd
-from merlin.datasets import DatasetMetadata
 import ast
+from pathlib import Path
 
+import numpy as np
+import pandas as pd
+
+from merlin.datasets import DatasetMetadata
+
+from .utils import fetch, read_idx
 
 MNIST_METADATA = {
     "name": "MNIST Database of Handwritten Digits",

@@ -20,11 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import torch
 import numpy as np
 import pytest
-from perceval.components import Circuit, PS, BS, PERM, Unitary
-from perceval.utils import Parameter, Matrix
+import torch
+from perceval.components import BS, PERM, PS, Circuit, Unitary
+from perceval.utils import Matrix, Parameter
+
 from merlin.pcvl_pytorch import CircuitConverter
 
 
@@ -89,7 +90,7 @@ def test_incorrect_input_param():
     torch_conv = CircuitConverter(c_ps, [""])
     with pytest.raises(AttributeError):
         # does not expect a dict but a list of tensors
-        torch_conv.to_tensor({"x": torch_1_tensor})
+        torch_conv.to_tensor(params)
 
     # expect a list of tensors, or a single tensor
     torch_conv.to_tensor(torch_2_tensor)
@@ -121,7 +122,7 @@ def test_bs_to_torch(bs_type):
     torch_conv = CircuitConverter(c_bs, input_specs=["theta"])
     torch_tensor = torch_conv.to_tensor([param_theta])
 
-    assert torch_tensor.shape == torch.Size((2*[c_bs.m]))
+    assert torch_tensor.shape == torch.Size(2*[c_bs.m])
 
     # compute unitary at the initial parameter value from perceval
     comp_param = c_bs.get_parameters()[0]

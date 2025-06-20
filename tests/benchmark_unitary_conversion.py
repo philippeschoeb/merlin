@@ -45,9 +45,11 @@
 import random
 
 import perceval as pcvl
-import torch
-from merlin.pcvl_pytorch import CircuitConverter
 import pytest
+import torch
+
+from merlin.pcvl_pytorch import CircuitConverter
+
 
 def generic_interferometer_weightparamweight(circuit_size):
     """Create a simple interferometer circuit with no parameters."""

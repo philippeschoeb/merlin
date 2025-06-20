@@ -27,6 +27,7 @@ Output mapping implementations for quantum-to-classical conversion.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from .strategies import OutputMappingStrategy
 
 

@@ -22,7 +22,9 @@
 
 import numpy as np
 from sklearn.utils import shuffle
+
 from merlin.datasets import DatasetMetadata
+
 
 def get_data(num_instances=1500, num_features=10, num_classes=3, random_seed=42):
     """

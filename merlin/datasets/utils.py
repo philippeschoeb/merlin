@@ -27,7 +27,6 @@ import site
 import sys
 import urllib.request
 from pathlib import Path
-from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -139,7 +138,7 @@ def fetch(url: str, data_dir: Path = None, force: bool = False) -> Path:
     return filepath
 
 
-def read_idx(filepath: Path) -> Tuple[np.ndarray, dict]:
+def read_idx(filepath: Path) -> tuple[np.ndarray, dict]:
     """
     Read an IDX file format as used in MNIST dataset.
 
@@ -176,7 +175,7 @@ def read_idx(filepath: Path) -> Tuple[np.ndarray, dict]:
 
         # Read dimensions
         dims = []
-        for i in range(n_dims):
+        for _i in range(n_dims):
             dim_size = int.from_bytes(f.read(4), byteorder='big')
             dims.append(dim_size)
 

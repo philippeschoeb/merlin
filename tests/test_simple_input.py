@@ -24,10 +24,15 @@
 Test file specifically for output mapping strategies in QuantumLayer.simple()
 """
 
-import torch
-import pytest
 import math
-from merlin import QuantumLayer, OutputMappingStrategy  # Replace with actual import path
+
+import pytest
+import torch
+
+from merlin import (  # Replace with actual import path
+    OutputMappingStrategy,
+    QuantumLayer,
+)
 
 
 class TestOutputMappingStrategies:
@@ -54,7 +59,7 @@ class TestOutputMappingStrategies:
         output = layer(x)
 
         print(f"Output shape: {output.shape}")
-        print(f"Distribution size should equal output size")
+        print("Distribution size should equal output size")
 
         # With NONE strategy, output should be the raw distribution
         assert output.shape[1] == layer.output_size
@@ -90,7 +95,7 @@ class TestOutputMappingStrategies:
         output = layer(x)
 
         assert output.shape == (2, dist_size)
-        print(f"✓ Successfully created NONE strategy with matching output_size")
+        print("✓ Successfully created NONE strategy with matching output_size")
 
     def test_none_strategy_with_mismatched_output_size(self):
         """Test that NONE strategy fails when output_size doesn't match distribution size."""
@@ -99,7 +104,7 @@ class TestOutputMappingStrategies:
         # This should raise an error because NONE strategy requires
         # output_size to match distribution size
         with pytest.raises(ValueError) as exc_info:
-            layer = QuantumLayer.simple(
+            _ = QuantumLayer.simple(
                 input_size=3,
                 n_params=100,
                 output_size=10,  # Arbitrary size that won't match distribution
@@ -142,7 +147,7 @@ class TestOutputMappingStrategies:
 
         # LINEAR strategy should fail without output_size
         with pytest.raises(ValueError) as exc_info:
-            layer = QuantumLayer.simple(
+            _ = QuantumLayer.simple(
                 input_size=3,
                 n_params=100,
                 output_mapping_strategy=OutputMappingStrategy.LINEAR
@@ -290,7 +295,7 @@ class TestOutputMappingStrategies:
                 # Check probability distribution sums to 1
                 assert torch.allclose(output.sum(dim=1), torch.ones(batch_size), atol=1e-5)
 
-            print(f"  ✓ Forward pass successful for all batch sizes")
+            print("  ✓ Forward pass successful for all batch sizes")
 
     def test_all_n_params_with_none_mapping(self):
         """Test NONE mapping with various n_params values."""
@@ -327,7 +332,7 @@ class TestOutputMappingStrategies:
             output = layer(x)
             assert output.shape == (2, dist_size)
 
-            print(f"  ✓ Configuration successful")
+            print("  ✓ Configuration successful")
 
     def test_edge_cases_with_none_mapping(self):
         """Test edge cases with NONE mapping."""
@@ -343,7 +348,7 @@ class TestOutputMappingStrategies:
         x1 = torch.rand(1, 1)
         output1 = layer1(x1)
         print(f"  Output shape: {output1.shape}")
-        print(f"  ✓ Minimum configuration works")
+        print("  ✓ Minimum configuration works")
 
         # Test 2: Large input size
         print("\nTest 2: Large input size (input_size=20)")
@@ -356,7 +361,7 @@ class TestOutputMappingStrategies:
         output2 = layer2(x2)
         print(f"  Output shape: {output2.shape}")
         print(f"  n_modes: {layer2.ansatz.experiment.n_modes}")
-        print(f"  ✓ Large input size works")
+        print("  ✓ Large input size works")
 
         # Test 3: Very small n_params that gets overridden by input_size+1
         print("\nTest 3: Small n_params (input_size=10, n_params=10)")
@@ -368,7 +373,7 @@ class TestOutputMappingStrategies:
         # Should use input_size + 1 = 11 modes
         assert layer3.ansatz.experiment.n_modes >= 11
         print(f"  n_modes: {layer3.ansatz.experiment.n_modes}")
-        print(f"  ✓ Correctly uses max(calculated, input_size+1)")
+        print("  ✓ Correctly uses max(calculated, input_size+1)")
 
 
     def test_none_mapping_with_reservoir_mode(self):

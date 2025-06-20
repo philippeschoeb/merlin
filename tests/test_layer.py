@@ -26,7 +26,7 @@ Tests for the main QuantumLayer class.
 
 import pytest
 import torch
-import torch.nn as nn
+
 import merlin as ML
 
 
@@ -229,7 +229,7 @@ class TestQuantumLayer:
         assert len(layer.bandwidth_coeffs) == 3  # One per input dimension
 
         # Check they're learnable parameters
-        for key, param in layer.bandwidth_coeffs.items():
+        for _key, param in layer.bandwidth_coeffs.items():
             assert param.requires_grad
 
     def test_output_mapping_strategies(self):

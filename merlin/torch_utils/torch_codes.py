@@ -20,18 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import torch
-from typing import Optional, Dict
 import math as math
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 from ..core.generators import CircuitType
+from ..sampling.strategies import OutputMappingStrategy
 
 """
 Output mapping implementations for quantum-to-classical conversion.
 """
-
-import torch.nn as nn
-import torch.nn.functional as F
-from ..sampling.strategies import OutputMappingStrategy
 
 
 class OutputMapper:
@@ -127,8 +127,8 @@ class FeatureEncoder:
         self.feature_count = feature_count
 
     def encode(self, X_norm: torch.Tensor, circuit_type: CircuitType, n_modes: int,
-               bandwidth_coeffs: Optional[Dict[str, torch.Tensor]] = None,
-               total_shifters: Optional[int] = None) -> torch.Tensor:
+               bandwidth_coeffs: dict[str, torch.Tensor] | None = None,
+               total_shifters: int | None = None) -> torch.Tensor:
         """Encode normalized features into quantum circuit parameters."""
         batch_size, num_features = X_norm.shape
 
@@ -217,7 +217,7 @@ class FeatureEncoder:
             if num_features == 1:
                 cols = []
                 scale = get_scale("dim_0")
-                for b in range(n_modes - 1):
+                for _b in range(n_modes - 1):
                     encoded = scale * math.pi * X_norm[:, 0]
                     cols.append(encoded.unsqueeze(1))
                 return torch.cat(cols, dim=1)

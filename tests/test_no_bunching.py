@@ -24,13 +24,13 @@
 Tests for no_bunching functionality in quantum computation.
 """
 
-import pytest
-import torch
 import math
-import merlin as ML
-from merlin.core.process import ComputationProcessFactory
-from merlin.core.generators import CircuitGenerator,StateGenerator
 
+import torch
+
+import merlin as ML
+from merlin.core.generators import CircuitGenerator, StateGenerator
+from merlin.core.process import ComputationProcessFactory
 
 
 def calculate_fock_space_size(n_modes: int, n_photons: int) -> int:

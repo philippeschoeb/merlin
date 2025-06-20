@@ -24,10 +24,9 @@
 Robustness and integration tests for Merlin.
 """
 
-import pytest
 import torch
 import torch.nn as nn
-import numpy as np
+
 import merlin as ML
 
 
@@ -237,7 +236,7 @@ class TestRobustness:
         layer2 = ML.QuantumLayer(input_size=2, ansatz=ansatz)
 
         # Parameters should be identical
-        for p1, p2 in zip(layer1.parameters(), layer2.parameters()):
+        for p1, p2 in zip(layer1.parameters(), layer2.parameters(), strict=False):
             assert torch.allclose(p1, p2, atol=1e-6)
 
     def test_memory_efficiency(self):
@@ -406,7 +405,7 @@ class TestIntegrationScenarios:
 
         # Check gradients exist for trainable parameters
         trainable_params = 0
-        for name, param in model.named_parameters():
+        for _name, param in model.named_parameters():
             if param.requires_grad and param.grad is not None:
                 trainable_params += 1
 
@@ -421,7 +420,7 @@ class TestIntegrationScenarios:
 
                 self.models = nn.ModuleList()
 
-                for i in range(n_models):
+                for _i in range(n_models):
                     experiment = ML.PhotonicBackend(
                         circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
                         n_modes=4,

@@ -20,20 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import torch
-import torch.nn as nn
-import perceval as pcvl
-import matplotlib.pyplot as plt
-
-import time
-from pynvml_utils import nvidia_smi
-import json
-import pynvml
-import os
-from torch.amp import GradScaler, autocast
-from merlin import QuantumLayer, OutputMappingStrategy
-import math
 import argparse
+import json
+import os
+import time
+
+import perceval as pcvl
+import pynvml
+import torch
+from pynvml_utils import nvidia_smi
+from torch.amp import GradScaler, autocast
+
+from merlin import OutputMappingStrategy, QuantumLayer
 
 parser = argparse.ArgumentParser(description="Test MerLin on your GPU !")
 parser.add_argument('--modes', type = int, default = 8, help = "Number of modes of the generic interferometer")
@@ -107,17 +105,9 @@ def benchmark_BS(MODES = 8, PHOTONS = 4, BS = 32, TYPE = torch.float32, set_hp =
         f"\n Create circuit with input state = {input_state} (nb photons = {sum(input_state)}, nb parameters = {nb_parameters})")
     input_size = len(
         [p.name for p in circuit.get_parameters() if p.name.startswith("theta") or p.name.startswith("phase")])
-    q_model = QuantumLayer(
-        input_size = input_size,
-        output_size = None,
-        circuit = circuit,
-        trainable_parameters = [],
-        input_parameters = ["phase", "theta"],
-        input_state = input_state,
-        no_bunching = True,
-        output_mapping_strategy = OutputMappingStrategy.NONE,
-        device = device,
-    )
+    q_model = QuantumLayer(input_size=input_size, output_size=None, circuit=circuit, input_state=input_state,
+                           trainable_parameters=[], input_parameters=["phase", "theta"],
+                           output_mapping_strategy=OutputMappingStrategy.NONE, device=device, no_bunching=True)
     print(f"Checking device of qlayer = {q_model.device}")
     t_end_layer = time.time()-t_start_layer
 
@@ -143,7 +133,7 @@ def benchmark_BS(MODES = 8, PHOTONS = 4, BS = 32, TYPE = torch.float32, set_hp =
 
     print("\n ----------------------------------------------- \n")
 
-    print(f"\n TRAINING IS STARTING \n")
+    print("\n TRAINING IS STARTING \n")
     ##########################################
     ### training loop to match the targets ###
     ##########################################
@@ -198,19 +188,20 @@ def benchmark_BS(MODES = 8, PHOTONS = 4, BS = 32, TYPE = torch.float32, set_hp =
         # memory monitoring
         nvsmi = nvidia_smi.getInstance()
         query_result = nvsmi.DeviceQuery('memory.free, memory.total')
+        total_used = 0
         for i, gpu_info in enumerate(query_result['gpu']):
             total = gpu_info['fb_memory_usage']['total']
             free = gpu_info['fb_memory_usage']['free']
             used = total - free
+            total_used += used
             print(f"GPU {i}: {used} MB used out of {total} MB")
 
-        history_used.append(used)
+        history_used.append(total_used)
         torch_history.append(torch.cuda.memory_allocated() / (1024 * 1024))
         torch_reserved_history.append(torch.cuda.memory_reserved() / (1024 * 1024))
         print(f"Memory allocated for PyTorch "
               f"\n - allocated: {torch.cuda.memory_allocated() / (1024 * 1024) :.2f} MB"
-              f"\n - reserved: {torch.cuda.memory_reserved() / (1024 * 1024) :.2f} MB"
-              f"\n - cached: {torch.cuda.memory_cached() / (1024 * 1024) :.2f} MB")
+              f"\n - reserved: {torch.cuda.memory_reserved() / (1024 * 1024) :.2f} MB")
         pynvml.nvmlInit()
         handle = pynvml.nvmlDeviceGetHandleByIndex(0)
         info = pynvml.nvmlDeviceGetMemoryInfo(handle)
@@ -231,11 +222,11 @@ def benchmark_BS(MODES = 8, PHOTONS = 4, BS = 32, TYPE = torch.float32, set_hp =
     backward_time = sum(history_backward) / len(history_backward)
 
     dict_results =  {"Batch size": BS, "mode": MODES, "nb photons": PHOTONS, "avg memory": avg_memory_needed, "torch memory": avg_torch, "reserved memory": avg_reserved,
-            "nb photons": sum(input_state), "type": str(type), "hp": set_hp, "t_layer":t_end_layer,
+            "type": str(type), "hp": set_hp, "t_layer":t_end_layer,
             "t forward": forward_time, "t backward": backward_time, "t_exp":t_exp}
     print(f"\n Final results: {dict_results}")
 
-    save_experiment_results(dict_results, filename = f'exp_MerlinRelease.json')
+    save_experiment_results(dict_results, filename = 'exp_MerlinRelease.json')
 
     print(f"\n --- \n Done for mode {MODES} with {PHOTONS} photons \n --- \n")
 
@@ -252,7 +243,7 @@ def save_experiment_results(results, filename='bunched_results.json'):
     # Check if file exists and load existing data
     if os.path.exists(filename):
         try:
-            with open(filename, 'r') as file:
+            with open(filename) as file:
                 all_results = json.load(file)
         except json.JSONDecodeError:
             # Handle case where file exists but is empty or corrupted
@@ -271,7 +262,7 @@ def save_experiment_results(results, filename='bunched_results.json'):
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    assert args.photons <= args.modes // 2, f"You cannot have more photons than half the number of modes"
-    assert args.photons > 0, f"You need at least 1 photon !"
+    assert args.photons <= args.modes // 2, "You cannot have more photons than half the number of modes"
+    assert args.photons > 0, "You need at least 1 photon !"
 
     benchmark_BS(MODES=args.modes, PHOTONS = args.photons, BS = args.bs, TYPE = args.type, set_hp = args.hp)

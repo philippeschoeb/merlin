@@ -21,9 +21,9 @@
 # SOFTWARE.
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Union, Any
 from datetime import datetime
-import json
+from typing import Any
+
 
 @dataclass
 class Normalization:
@@ -39,9 +39,9 @@ class Normalization:
 
 @dataclass
 class FeatureNormalization:
-    original_unit: Optional[str] = None
-    scale_factor: Optional[float] = None
-    offset: Optional[float] = None
+    original_unit: str | None = None
+    scale_factor: float | None = None
+    offset: float | None = None
 
     def to_text(self) -> str:
         parts = []
@@ -58,10 +58,10 @@ class Feature:
     name: str
     description: str
     type: str
-    value_range: Optional[tuple] = None
-    unit: Optional[str] = None
-    stats: Optional[Dict[str, float]] = None
-    normalization: Optional[FeatureNormalization] = None
+    value_range: tuple | None = None
+    unit: str | None = None
+    stats: dict[str, float] | None = None
+    normalization: FeatureNormalization | None = None
 
     def to_text(self) -> str:
         text = f"- {self.name} ({self.type}): {self.description}"
@@ -90,23 +90,23 @@ class Feature:
 class DatasetMetadata:
     name: str
     description: str
-    features: List[Feature]
+    features: list[Feature]
     num_instances: int
     subset: str = None
     num_features: int = None
-    normalization: Optional[Normalization] = None
-    task_type: Optional[List[str]] = field(default_factory=list)
-    num_classes: Optional[int] = None
-    characteristics: List[str] = field(default_factory=list)
-    homepage: Optional[str] = None
-    license: Optional[str] = None
-    citation: Optional[str] = None
-    creators: List[str] = field(default_factory=list)
-    year: Optional[int] = None
-    feature_relationships: Optional[str] = None
+    normalization: Normalization | None = None
+    task_type: list[str] | None = field(default_factory=list)
+    num_classes: int | None = None
+    characteristics: list[str] = field(default_factory=list)
+    homepage: str | None = None
+    license: str | None = None
+    citation: str | None = None
+    creators: list[str] = field(default_factory=list)
+    year: int | None = None
+    feature_relationships: str | None = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DatasetMetadata':
+    def from_dict(cls, data: dict[str, Any]) -> 'DatasetMetadata':
         # Extract features from various formats
         features = []
         if 'features' in data:
@@ -192,9 +192,9 @@ class DatasetMetadata:
         if self.subset:
             text.append(f"Subset: {self.subset}")
         text += [
-            f"\nDescription:",
+            "\nDescription:",
             self.description,
-            f"\nBasic Information:",
+            "\nBasic Information:",
             f"- Number of instances: {self.num_instances:,}",
             f"- Number of features: {self.num_features:,}",
         ]
@@ -228,12 +228,12 @@ class DatasetMetadata:
         if self.license:
             text.append(f"License: {self.license}")
         if self.citation:
-            text.append(f"\nCitation:")
+            text.append("\nCitation:")
             text.append(self.citation)
 
         return "\n".join(text)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the metadata to a dictionary format"""
         return {
             "name": self.name,

@@ -24,10 +24,9 @@
 Quantum circuit generation utilities.
 """
 
-import perceval as pcvl
-
-
 from enum import Enum
+
+import perceval as pcvl
 
 
 class CircuitType(Enum):
