@@ -28,19 +28,51 @@ from ..core.generators import CircuitType
 
 
 class FeatureEncoder:
-    """Utility class for encoding classical features into quantum circuit parameters."""
+    """Utility class for encoding classical features into quantum circuit parameters.
+
+    This class provides methods to encode normalized classical features into parameters
+    that can be used to configure quantum circuits. Different encoding strategies are
+    supported depending on the circuit type.
+    """
 
     def __init__(self, feature_count: int):
+        """Initialize the feature encoder.
+
+        Args:
+            feature_count: Number of input features to encode
+        """
         self.feature_count = feature_count
 
     def encode(self, X_norm: torch.Tensor, circuit_type: CircuitType, n_modes: int,
                bandwidth_coeffs: dict[str, torch.Tensor] | None = None,
                total_shifters: int | None = None) -> torch.Tensor:
-        """Encode normalized features into quantum circuit parameters."""
+        """Encode normalized features into quantum circuit parameters.
+
+        Args:
+            X_norm: Normalized input features of shape (batch_size, num_features)
+            circuit_type: Type of quantum circuit architecture
+            n_modes: Number of modes in the quantum circuit
+            bandwidth_coeffs: Optional bandwidth tuning coefficients for each feature dimension
+            total_shifters: Optional total number of phase shifters (unused in current implementation)
+
+        Returns:
+            Encoded parameters tensor of shape (batch_size, num_parameters)
+
+        Raises:
+            ValueError: If circuit_type is not supported
+        """
         batch_size, num_features = X_norm.shape
 
         def get_scale(key: str, idx: int = 0) -> torch.Tensor:
-            """Get bandwidth tuning coefficient while preserving gradients."""
+            """Get bandwidth tuning coefficient while preserving gradients.
+
+            Args:
+                key: Key to look up in bandwidth_coeffs
+                idx: Index for multi-dimensional coefficients
+
+            Returns:
+                Bandwidth scaling coefficient as a tensor
+            """
             if bandwidth_coeffs is None or key not in bandwidth_coeffs:
                 return torch.tensor(1.0, dtype=X_norm.dtype, device=X_norm.device)
 
@@ -66,8 +98,6 @@ class FeatureEncoder:
                     encoded = scale*multiplier * math.pi * X_norm[:, dim_idx]
                     cols.append(encoded.unsqueeze(1))
             return torch.cat(cols, dim=1)
-
-
 
         elif circuit_type == CircuitType.SERIES:
             cols = []
@@ -117,7 +147,6 @@ class FeatureEncoder:
 
             # Should have exactly max_subsets encodings, no padding needed
             return torch.cat(cols, dim=1)
-
 
         # PARALLEL: Direct feature-to-parameter mapping
         elif circuit_type == CircuitType.PARALLEL:
