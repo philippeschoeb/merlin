@@ -29,9 +29,9 @@ The optimized implementation pre-builds the computation graph based on the input
 configuration, which can then be reused for multiple unitary evaluations.
 """
 
-import math
 import os
-from typing import List, Tuple, Callable, Optional, Dict, Any
+from collections.abc import Callable
+
 import torch
 import torch.jit as jit
 
@@ -209,12 +209,12 @@ class SLOSComputeGraph:
             self,
             m: int,
             n_photons: int,
-            output_map_func: Callable[[Tuple[int, ...]], Optional[Tuple[int, ...]]] = None,
+            output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] = None,
             no_bunching: bool = True,
             keep_keys: bool = True,
             device=None,  # Optional device parameter
             dtype: torch.dtype = torch.float, # Optional dtype parameter
-            index_photons: [Tuple[int, ...]] = None,
+            index_photons: [tuple[int, ...]] = None,
     ):
         """
         Initialize the SLOS computation graph.
@@ -250,7 +250,7 @@ class SLOSComputeGraph:
         # Determine corresponding complex dtype using helper function
         try:
             self.complex_dtype = _get_complex_dtype_for_float(dtype)
-        except ValueError as e:
+        except ValueError:
             raise ValueError(f"Unsupported dtype: {dtype}. Must be torch.float16, torch.float, or torch.float64")
 
         # Check input validity
@@ -271,8 +271,6 @@ class SLOSComputeGraph:
 
         # Initial state is all zeros
         last_combinations = {tuple([0] * self.m): (1, 0)}
-
-        input_state_tensor = torch.zeros(self.m, dtype=self.dtype, device=self.device)
 
         # For each photon/layer, compute the state combinations and operations
         for idx in range(self.n_photons):
@@ -319,7 +317,7 @@ class SLOSComputeGraph:
             mapping_indices = {}  # Maps mapped state to its index
             self.mapped_indices = []  # For each original state, store the mapped index
 
-            for idx, key in enumerate(self.final_keys):
+            for _idx, key in enumerate(self.final_keys):
                 mapped_state = self.output_map_func(key)
                 # We know mapped_state is not None because we filtered those out during graph construction
                 if mapped_state not in mapping_indices:
@@ -344,7 +342,7 @@ class SLOSComputeGraph:
         # Create layer computation functions
         self.layer_functions = []
 
-        for layer_idx, (sources, destinations, modes) in enumerate(self.vectorized_operations):
+        for _layer_idx, (sources, destinations, modes) in enumerate(self.vectorized_operations):
             # Get the photon index for this layer
 
             # Create a partial function with fixed operations
@@ -391,7 +389,7 @@ class SLOSComputeGraph:
         else:
             self.mapping_function = lambda x: x
 
-    def compute(self, unitary: torch.Tensor, input_state: list[int]) -> Tuple[List[Tuple[int, ...]], torch.Tensor]:
+    def compute(self, unitary: torch.Tensor, input_state: list[int]) -> tuple[list[tuple[int, ...]], torch.Tensor]:
         """
         Compute the probability distribution using the pre-built graph.
 
@@ -500,8 +498,8 @@ class SLOSComputeGraph:
                             f"torch.complex64, and torch.complex128.")
         if self.output_map_func is not None:
             self.target_indices.to(dtype=dtype, device=self.device)
-        for idx, (sources, destinations, modes) in enumerate(self.vectorized_operations):    
-            self.vectorized_operations[idx] = (sources.to(dtype=dtype, device=self.device), 
+        for idx, (sources, destinations, modes) in enumerate(self.vectorized_operations):
+            self.vectorized_operations[idx] = (sources.to(dtype=dtype, device=self.device),
                                                    destinations.to(dtype=dtype, device=self.device),
                                                    modes.to(dtype=dtype, device=self.device))
 
@@ -512,7 +510,7 @@ class SLOSComputeGraph:
     def compute_pa_inc(self, unitary: torch.Tensor,
                        input_state_prev: list[int],
                        contributions: torch.Tensor,
-                       input_state: list[int]) -> Tuple[List[Tuple[int, ...]], torch.Tensor]:
+                       input_state: list[int]) -> tuple[list[tuple[int, ...]], torch.Tensor]:
 
         if len(unitary.shape) == 2:
             is_batched = False
@@ -565,7 +563,7 @@ class SLOSComputeGraph:
         # Calculate probabilities
         #probabilities = (amplitudes.abs() ** 2).real
         probabilities = amplitudes.real ** 2 + amplitudes.imag ** 2
-        probabilities *= self.norm_factor_output.to(device=device)
+        probabilities *= self.norm_factor_output.to(device=self.device)
         probabilities /= self.norm_factor_input
 
         # Apply output mapping if needed
@@ -595,12 +593,12 @@ class SLOSComputeGraph:
 def build_slos_distribution_computegraph(
         m,
         n_photons,
-        output_map_func: Callable[[Tuple[int, ...]], Optional[Tuple[int, ...]]] = None,
+        output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] = None,
         no_bunching: bool = False,
         keep_keys: bool = True,
         device=None,
         dtype: torch.dtype = torch.float,
-        index_photons: [Tuple[int, ...]] = None,
+        index_photons: [tuple[int, ...]] = None,
 ) -> SLOSComputeGraph:
     """
     Build a computation graph for Strong Linear Optical Simulation (SLOS) algorithm
@@ -725,12 +723,12 @@ def load_slos_distribution_computegraph(path):
 
 def compute_slos_distribution(
         unitary: torch.Tensor,
-        input_state: List[int],
-        output_map_func: Callable[[Tuple[int, ...]], Optional[Tuple[int, ...]]] = None,
+        input_state: list[int],
+        output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] = None,
         no_bunching: bool = False,
         keep_keys: bool = True,
-        index_photons: [Tuple[int, ...]] = None,
-) -> Tuple[List[Tuple[int, ...]], torch.Tensor]:
+        index_photons: [tuple[int, ...]] = None,
+) -> tuple[list[tuple[int, ...]], torch.Tensor]:
     """
     TorchScript-optimized version of pytorch_slos_output_distribution.
 
@@ -772,7 +770,7 @@ def compute_slos_distribution(
 # Example usage
 if __name__ == "__main__":
     import time
-    import perceval as pcvl
+
 
     # Test different precisions with explicit dtype specification
     dtypes = [torch.float, torch.float64]
@@ -801,7 +799,7 @@ if __name__ == "__main__":
         keys, probs = graph.compute(q)
         compute_time = time.time() - start_time
 
-        print(f"  Method 1 (explicit graph building):")
+        print("  Method 1 (explicit graph building):")
         print(f"    Graph build time: {build_time:.4f} seconds")
         print(f"    Compute time: {compute_time:.4f} seconds")
         print(f"    Probability sum: {probs.sum().item():.8f}")
@@ -811,6 +809,6 @@ if __name__ == "__main__":
         keys2, probs2 = compute_slos_distribution(q, input_state)  # dtype inferred from unitary
         total_time = time.time() - start_time
 
-        print(f"  Method 2 (using compute_slos_distribution with inferred dtype):")
+        print("  Method 2 (using compute_slos_distribution with inferred dtype):")
         print(f"    Total time: {total_time:.4f} seconds")
         print(f"    Probability sum: {probs2.sum().item():.8f}")

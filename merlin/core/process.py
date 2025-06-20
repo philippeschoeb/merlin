@@ -24,24 +24,26 @@
 """
 Quantum computation processes and factories.
 """
-from typing import List, Optional
-import torch
+
 import perceval as pcvl
+import torch
+
+from merlin.pcvl_pytorch import CircuitConverter, build_slos_distribution_computegraph
 
 from .base import AbstractComputationProcess
-from merlin.pcvl_pytorch import CircuitConverter, build_slos_distribution_computegraph
+
 
 class ComputationProcess(AbstractComputationProcess):
     """Handles quantum circuit computation and state evolution."""
 
     def __init__(self,
                  circuit: pcvl.Circuit,
-                 input_state: List[int],
-                 trainable_parameters: List[str],
-                 input_parameters: List[str],
+                 input_state: list[int],
+                 trainable_parameters: list[str],
+                 input_parameters: list[str],
                  reservoir_mode: bool = False,
                  dtype: torch.dtype = torch.float32,
-                 device: Optional[torch.device] = None,
+                 device: torch.device | None = None,
                  no_bunching: bool = None,
                  output_map_func=None,
                  index_photons=None):
@@ -87,7 +89,7 @@ class ComputationProcess(AbstractComputationProcess):
             index_photons=self.index_photons
         )
 
-    def compute(self, parameters: List[torch.Tensor]) -> torch.Tensor:
+    def compute(self, parameters: list[torch.Tensor]) -> torch.Tensor:
         """Compute quantum output distribution."""
         # Generate unitary matrix from parameters
         unitary = self.converter.to_tensor(*parameters)
@@ -97,7 +99,7 @@ class ComputationProcess(AbstractComputationProcess):
 
         return distribution
 
-    def compute_with_keys(self, parameters: List[torch.Tensor]):
+    def compute_with_keys(self, parameters: list[torch.Tensor]):
         """Compute quantum output distribution and return both keys and probabilities."""
         # Generate unitary matrix from parameters
         unitary = self.converter.to_tensor(*parameters)
@@ -113,9 +115,9 @@ class ComputationProcessFactory:
 
     @staticmethod
     def create(circuit: pcvl.Circuit,
-               input_state: List[int],
-               trainable_parameters: List[str],
-               input_parameters: List[str],
+               input_state: list[int],
+               trainable_parameters: list[str],
+               input_parameters: list[str],
                reservoir_mode: bool = False,
                no_bunching: bool = None,
                output_map_func=None,

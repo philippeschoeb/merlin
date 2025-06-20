@@ -1,21 +1,17 @@
 
 
 import math
-import numpy
-import numpy as np
 import time
+import warnings
+from itertools import chain, product
+
+import exqalibur as xqlbr
+import perceval as pcvl  # Import Perceval only in worker process
 import torch
 import torch.nn as nn
-import os
-from itertools import product
-from typing import Tuple, List, Union
-
-import perceval as pcvl  # Import Perceval only in worker process
-import exqalibur as xqlbr
-from merlin import QuantumLayer, OutputMappingStrategy
-import warnings
 from perceval.utils import allstate_iterator
-from itertools import chain
+
+from merlin import OutputMappingStrategy, QuantumLayer
 
 
 class BosonSampler:
@@ -100,20 +96,11 @@ class BosonSampler:
             trainable_parameters = ["phi"]
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         start = time.time()
-        self.model = QuantumLayer(
-            input_size=0,
-            output_size=None,
-            circuit=self.circuit,
-            trainable_parameters=trainable_parameters,  # Parameters to be trained - all "phis"
-            n_photons=self.n,  # Random Initial quantum state used only for initialization
-            output_mapping_strategy=OutputMappingStrategy.NONE,
-            device=self.device,  # Optional: Specify device
-            dtype=torch.float32,  # Optional: Specify numerical precision
-            shots=1000,  # Optional: Enable quantum measurement sampling
-            no_bunching=True,
-            sampling_method='multinomial', # Optional: Specify sampling method
-            index_photons=index_photons,
-        )
+        self.model = QuantumLayer(input_size=0, output_size=None, circuit=self.circuit, n_photons=self.n,
+                                  trainable_parameters=trainable_parameters,
+                                  output_mapping_strategy=OutputMappingStrategy.NONE, device=self.device,
+                                  dtype=torch.float32, shots=1000, sampling_method='multinomial', no_bunching=True,
+                                  index_photons=index_photons)
         self.get_post_selected_space()
         print("time to load model", time.time() - start)
 

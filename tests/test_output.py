@@ -23,8 +23,8 @@
 import pytest
 import torch
 import torch.nn as nn
-import merlin as ML
 
+import merlin as ML
 
 
 class TestOutputMapper:

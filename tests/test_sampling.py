@@ -24,9 +24,11 @@
 Tests for sampling and autodiff utilities.
 """
 
+import warnings
+
 import pytest
 import torch
-import warnings
+
 import merlin as ML
 
 

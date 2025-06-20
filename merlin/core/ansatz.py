@@ -24,24 +24,23 @@
 Ansatz configuration and factory for quantum layers.
 """
 
-from typing import Optional
+
 import torch
 
-from .photonicbackend import PhotonicBackend
+from ..core.generators import CircuitGenerator, StateGenerator
+from ..core.process import ComputationProcessFactory
 from ..sampling.strategies import OutputMappingStrategy
 from ..torch_utils.torch_codes import FeatureEncoder
-from ..core.generators import CircuitGenerator
-from ..core.generators import StateGenerator
-from ..core.process import ComputationProcessFactory
+from .photonicbackend import PhotonicBackend
 
 
 class Ansatz:
     """Complete configuration for a quantum neural network layer."""
 
-    def __init__(self, PhotonicBackend: PhotonicBackend, input_size: int, output_size: Optional[int] = None,
+    def __init__(self, PhotonicBackend: PhotonicBackend, input_size: int, output_size: int | None = None,
                  output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.LINEAR,
-                 device: Optional[torch.device] = None,
-                 dtype: Optional[torch.dtype] = None):
+                 device: torch.device | None = None,
+                 dtype: torch.dtype | None = None):
         self.experiment = PhotonicBackend
         self.input_size = input_size
         self.output_size = output_size
@@ -83,10 +82,10 @@ class AnsatzFactory:
     """Factory for creating quantum layer ansatzes (complete configurations)."""
 
     @staticmethod
-    def create(PhotonicBackend: PhotonicBackend, input_size: int, output_size: Optional[int] = None,
+    def create(PhotonicBackend: PhotonicBackend, input_size: int, output_size: int | None = None,
                output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.LINEAR,
-               device: Optional[torch.device] = None,
-               dtype: Optional[torch.dtype] = None) -> Ansatz:
+               device: torch.device | None = None,
+               dtype: torch.dtype | None = None) -> Ansatz:
         """Create a complete ansatz configuration."""
         return Ansatz(
             PhotonicBackend=PhotonicBackend,
