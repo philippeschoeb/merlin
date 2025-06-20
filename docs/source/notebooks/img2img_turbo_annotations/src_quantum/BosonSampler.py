@@ -234,7 +234,7 @@ class BosonSampler:
             # Apply sampling if requested
             if apply_sampling and shots and shots > 0:
                 distribution = self.model.autodiff_process.sampling_noise.pcvl_sampler(
-                    distribution, shots, self.model.sampling_method
+                    distribution, shots
                 )
 
             # Apply output mapping

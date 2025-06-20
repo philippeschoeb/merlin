@@ -95,7 +95,7 @@ class QuantumLayer(nn.Module):
             raise ValueError("Either 'ansatz' or 'circuit' must be provided")
 
         # Setup sampling
-        self.autodiff_process = AutoDiffProcess()
+        self.autodiff_process = AutoDiffProcess(sampling_method)
         self.shots = shots
         self.sampling_method = sampling_method
 
@@ -425,7 +425,7 @@ class QuantumLayer(nn.Module):
 
         if apply_sampling and shots > 0:
             distribution = self.autodiff_process.sampling_noise.pcvl_sampler(
-                distribution, shots, self.sampling_method
+                distribution, shots
             )
 
         # Apply output mapping

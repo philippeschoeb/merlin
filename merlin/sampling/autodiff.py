@@ -32,8 +32,8 @@ from .process import SamplingProcess
 class AutoDiffProcess:
     """Handles automatic differentiation backend and sampling noise integration."""
 
-    def __init__(self):
-        self.sampling_noise = SamplingProcess()
+    def __init__(self, sampling_method: str = "multinomial"):
+        self.sampling_noise = SamplingProcess(method=sampling_method)
 
     def autodiff_backend(self, needs_gradient: bool, apply_sampling: bool,
                          shots: int) -> tuple[bool, int]:
