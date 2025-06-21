@@ -43,10 +43,10 @@ Then this file is interpreted
 import os
 import sys
 from datetime import datetime
-from pathlib import Path
 from importlib.metadata import metadata
+from pathlib import Path
 
-sys.path.insert(0, os.path.realpath("../"))
+sys.path.insert(0, os.path.realpath("../../"))
 
 
 merlinMetadata = metadata('merlinquantum')
@@ -83,6 +83,17 @@ extensions = [
 suppress_warnings = ['autosectionlabel.*']
 bibtex_bibfiles = ["references.bib"]
 bibtex_reference_style = "author_year"
+
+# Autodoc configuration
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+    'show-inheritance': True,
+    'imported-members': False,  # Don't document imported members to avoid duplicates
+}
+
+# Suppress duplicate object warnings for re-exported classes
+suppress_warnings.extend(['autodoc.import_object'])
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
