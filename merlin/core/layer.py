@@ -500,8 +500,7 @@ class QuantumLayer(nn.Module):
 
         Args:
             input_size (int): Size of the input vector
-            n_params (int): Total number of parameters desired (default: 100)
-                Formula: n_params = 2 * n_modes^2
+            n_params (int): Total number of parameters desired (default: 100). Formula: n_params = 2 * n_modes^2
             shots (int): Number of shots for sampling (default: 0)
             reservoir_mode (bool): Whether to use reservoir mode (default: False)
             output_size (int, optional): Output dimension. If None, uses distribution size

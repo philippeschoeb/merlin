@@ -105,16 +105,11 @@ def layer_compute_vectorized(unitary: torch.Tensor, prev_amplitudes: torch.Tenso
         Next layer amplitudes [batch_size, next_size]
     """
 
-
-
     batch_size = unitary.shape[0]
 
     # Handle empty operations case
     if sources.shape[0] == 0:
         return prev_amplitudes
-
-
-
 
 
     # Determine output size
@@ -394,8 +389,8 @@ class SLOSComputeGraph:
         Compute the probability distribution using the pre-built graph.
 
         Args:
-            unitary (torch.Tensor): Single unitary matrix [m x m] or batch of unitaries [b x m x m]
-                The unitary should be provided in the complex dtype corresponding to the graph's dtype.
+            unitary (torch.Tensor): Single unitary matrix [m x m] or batch of unitaries [b x m x m].\
+                The unitary should be provided in the complex dtype corresponding to the graph's dtype.\
                 For example, for torch.float32, use torch.cfloat; for torch.float64, use torch.cdouble.
             input_state (list[int]): Input_state of length self.m with self.n_photons in the input state
 
@@ -556,7 +551,8 @@ class SLOSComputeGraph:
             p_neg = idx_n_neg[layer_idx]
             amplitudes = layer_compute_backward(unitary, contributions, sources, modes, p_neg)
             p_pos = idx_n_pos[layer_idx]
-            amplitudes, contributions = layer_compute_vectorized(unitary, amplitudes, sources, destinations, modes, p_pos, return_contributions=True)
+            amplitudes, contributions = layer_compute_vectorized(unitary, amplitudes, sources, destinations, modes,
+                                                                 p_pos, return_contributions=True)
 
 
         self.contributions = contributions
@@ -742,7 +738,7 @@ def compute_slos_distribution(
         output_map_func (callable, optional): Function that maps output states
         no_bunching (bool): If True, the algorithm is optimized for no-bunching states only
         keep_keys (bool): If True, output state keys are returned
-        index_photons: List of tuples (first_integer, second_integer). The first_integer is the
+        index_photons: List of tuples (first_integer, second_integer). The first_integer is the\
                   lowest index layer a photon can take and the second_integer is the highest index
 
 

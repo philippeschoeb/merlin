@@ -38,22 +38,104 @@ from perceval.components import (
 )
 
 SUPPORTED_COMPONENTS = (PS, BS, PERM, Unitary, Barrier)
+"""Tuple of quantum components supported by CircuitConverter.
+
+Components:
+    PS: Phase shifter with single phi parameter
+    BS: Beam splitter with theta and four phi parameters
+    PERM: Mode permutation (no parameters)
+    Unitary: Generic unitary matrix (no parameters)
+    Barrier: Synchronization barrier (removed during compilation)
+"""
 
 
 class CircuitConverter:
-    """
-    Convert a parameterized Perceval circuit into a differentiable PyTorch unitary matrix.
-    Supports batch processing if "input_params" is a 2D tensor.
+    """Convert a parameterized Perceval circuit into a differentiable PyTorch unitary matrix.
 
+    This class converts Perceval quantum circuits into PyTorch tensors that can be used
+    in neural network training with automatic differentiation. It supports batch processing
+    for efficient training and handles various quantum components like beam splitters,
+    phase shifters, and unitary operations.
+
+    Supported Components:
+        - PS (Phase Shifter)
+        - BS (Beam Splitter)
+        - PERM (Permutation)
+        - Unitary (Generic unitary matrix)
+        - Barrier (no-op, removed during compilation)
+
+    Attributes:
+        circuit: The Perceval circuit to convert
+        param_mapping: Maps parameter names to tensor indices
+        device: PyTorch device for tensor operations
+        tensor_cdtype: Complex tensor dtype
+        tensor_fdtype: Float tensor dtype
+
+    Example:
+        Basic usage with a single phase shifter:
+
+        >>> import torch
+        >>> import perceval as pcvl
+        >>> from merlin.pcvl_pytorch.locirc_to_tensor import CircuitConverter
+        >>>
+        >>> # Create a simple circuit with one phase shifter
+        >>> circuit = pcvl.Circuit(1) // pcvl.PS(pcvl.P("phi"))
+        >>>
+        >>> # Convert to PyTorch with gradient tracking
+        >>> converter = CircuitConverter(circuit, input_specs=["phi"])
+        >>> phi_params = torch.tensor([0.5], requires_grad=True)
+        >>> unitary = converter.to_tensor(phi_params)
+        >>> print(unitary.shape)  # torch.Size([1, 1])
+
+        Multiple parameters with grouping:
+
+        >>> # Circuit with multiple phase shifters
+        >>> circuit = (pcvl.Circuit(2)
+        ...            // pcvl.PS(pcvl.P("theta1"))
+        ...            // (1, pcvl.PS(pcvl.P("theta2"))))
+        >>>
+        >>> converter = CircuitConverter(circuit, input_specs=["theta"])
+        >>> theta_params = torch.tensor([0.1, 0.2], requires_grad=True)
+        >>> unitary = converter.to_tensor(theta_params)
+        >>> print(unitary.shape)  # torch.Size([2, 2])
+
+        Batch processing for training:
+
+        >>> # Batch of parameter values
+        >>> batch_params = torch.tensor([[0.1], [0.2], [0.3]], requires_grad=True)
+        >>> converter = CircuitConverter(circuit, input_specs=["phi"])
+        >>> batch_unitary = converter.to_tensor(batch_params)
+        >>> print(batch_unitary.shape)  # torch.Size([3, 1, 1])
+
+        Training integration:
+
+        >>> # Training loop with beam splitter
+        >>> circuit = pcvl.Circuit(2) // pcvl.BS.Rx(pcvl.P("theta"))
+        >>> converter = CircuitConverter(circuit, ["theta"])
+        >>> theta = torch.tensor([0.5], requires_grad=True)
+        >>> optimizer = torch.optim.Adam([theta], lr=0.01)
+        >>>
+        >>> for step in range(10):
+        ...     optimizer.zero_grad()
+        ...     unitary = converter.to_tensor(theta)
+        ...     loss = some_loss_function(unitary)
+        ...     loss.backward()
+        ...     optimizer.step()
     """
 
     def __init__(self, circuit: Circuit, input_specs: list[str] = None, dtype: torch.dtype = torch.complex64, device: torch.device = torch.device('cpu')):
-        """
-        Initializes the CircuitConverter with a Perceval circuit.
+        """Initialize the CircuitConverter with a Perceval circuit.
 
-        :param circuit: a parametrized Perceval Circuit object
-        :param input_specs: List of parameter specs (names/prefixes), if ommited, we will expect a single tensor
-        :param dtype: The data type to use for the tensors - one can specify either a float or complex dtype.
+        Args:
+            circuit: A parameterized Perceval Circuit object to convert
+            input_specs: List of parameter name prefixes for grouping parameters into separate tensors.\
+                         If None, all parameters go into a single tensor
+            dtype: Tensor data type (float32/complex64 or float64/complex128)
+            device: PyTorch device for tensor operations
+
+        Raises:
+            ValueError: If input_specs don't match any circuit parameters
+            TypeError: If circuit is not a Perceval Circuit object
         """
 
         # device is the device where the tensors will be allocated, default is set with torch.device('xxx')
@@ -96,6 +178,14 @@ class CircuitConverter:
         self.list_rct = self._compile_circuit()
 
     def set_dtype(self, dtype: torch.dtype):
+        """Set the tensor data types for float and complex operations.
+
+        Args:
+            dtype: Target dtype (float32/complex64 or float64/complex128)
+
+        Raises:
+            TypeError: If dtype is not supported
+        """
         if dtype == torch.float32 or dtype == torch.complex64:
             self.tensor_fdtype = torch.float32
             self.tensor_cdtype = torch.complex64
@@ -107,12 +197,17 @@ class CircuitConverter:
                             f"torch.complex64, and torch.complex128.")
 
     def to(self, dtype: torch.dtype, device: str | torch.device):
-        """
-        Moves the converter to a specific device.
+        """Move the converter to a specific device and dtype.
 
-        :param dtype: The data type to use for the tensors - one can specify either a float or complex dtype.
-                      Supported dtypes are torch.float32 or torch.complex64, torch.float64 or torch.complex128.
-        :param device: The device to move the converter to.
+        Args:
+            dtype: Target tensor dtype (float32/complex64 or float64/complex128)
+            device: Target device (string or torch.device)
+
+        Returns:
+            Self for method chaining
+
+        Raises:
+            TypeError: If device type or dtype is not supported
         """
         if isinstance(device, str):
             self.device = torch.device(device)
@@ -133,8 +228,18 @@ class CircuitConverter:
         return self
 
     def _compile_circuit(self):
-        """
-        Precompile the circuit to remove barriers and merge blocks without parameters
+        """Precompile the circuit to optimize performance.
+
+        This method:
+        1. Removes barrier components (no-ops)
+        2. Precomputes tensors for components without parameters
+        3. Merges adjacent non-parameterized components to reduce computation
+
+        Returns:
+            List of (mode_range, component_or_tensor) tuples for the compiled circuit
+
+        Raises:
+            TypeError: If circuit contains unsupported component types
         """
 
         # we are building a list of components or precompiled tensors or dimension (1, m, m)
@@ -195,16 +300,19 @@ class CircuitConverter:
 
     def to_tensor(self, *input_params: torch.Tensor,
                   batch_size: int = None) -> torch.Tensor:
-        """
-        Converts a parameterized Perceval circuit to a PyTorch unitary tensor.
+        r"""Convert the parameterized circuit to a PyTorch unitary tensor.
 
-        :param *input_params: Pytorch list of tensors of shape (num_params,) or (batch_size, num_params),
-                             representing parameters as defined by input_specs and indexed by param_mapping.
-        :param batch_size: The batch size for the input parameters. If none, it is discovered from the input_params.
-                           by default, it is set to 1.
+        Args:
+            \*input_params: Variable number of parameter tensors. Each tensor has shape (num_params,) or (batch_size, num_params) corresponding to input_specs order.
+            batch_size: Explicit batch size. If None, inferred from input tensors.
 
-        returns: The complex-valued converted Pytorch tensor of shape (circuit.m, circuit.m)
-        or (batch_size, circuit.m, circuit.m).
+        Returns:
+            Complex unitary tensor of shape (circuit.m, circuit.m) for single samples\
+                 or (batch_size, circuit.m, circuit.m) for batched inputs.
+
+        Raises:
+            ValueError: If wrong number of input tensors provided.
+            TypeError: If input_params is not a list or tuple.
         """
         if len(input_params) == 1 and isinstance(input_params[0], list):
             input_params = input_params[0]
@@ -250,12 +358,33 @@ class CircuitConverter:
 
     @dispatch((Unitary, PERM))
     def _compute_tensor(self, comp: AComponent) -> torch.Tensor:
-        # Both PERM and a generic Unitary component has no parameters
+        """Compute tensor for Unitary and Permutation components.
+
+        Args:
+            comp: Unitary or PERM component (no parameters)
+
+        Returns:
+            Batched unitary tensor of shape (batch_size, comp_size, comp_size)
+        """
         return torch.tensor(comp.compute_unitary(),
                             dtype=self.tensor_cdtype, device=self.device).unsqueeze(0).expand(self.batch_size, -1, -1)
 
     @dispatch(BS)
     def _compute_tensor(self, comp: AComponent) -> torch.Tensor:
+        """Compute tensor for Beam Splitter component.
+
+        Handles different BS conventions (Rx, Ry, H) and processes 5 parameters:
+        theta, phi_tl, phi_bl, phi_tr, phi_br
+
+        Args:
+            comp: BS component with parameters
+
+        Returns:
+            Batched 2x2 unitary tensor of shape (batch_size, 2, 2)
+
+        Raises:
+            NotImplementedError: If BS convention is not supported
+        """
         param_values = []
 
         for _index, param in enumerate(comp.get_parameters(all_params=True)):
@@ -298,6 +427,14 @@ class CircuitConverter:
 
     @dispatch(PS)
     def _compute_tensor(self, comp: AComponent) -> torch.Tensor:
+        """Compute tensor for Phase Shifter component.
+
+        Args:
+            comp: PS component with phi parameter
+
+        Returns:
+            Batched 1x1 phase tensor of shape (batch_size, 1, 1)
+        """
         if comp.param("phi").is_variable:
             (tensor_id, idx_in_tensor) = self.param_mapping[comp.param("phi").name]
             phase = self.torch_params[tensor_id][..., idx_in_tensor]
