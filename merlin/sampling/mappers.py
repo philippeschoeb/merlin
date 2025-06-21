@@ -32,11 +32,27 @@ from .strategies import OutputMappingStrategy
 
 
 class OutputMapper:
-    """Handles mapping quantum probability distributions to classical outputs."""
+    """Handles mapping quantum probability distributions to classical outputs.
+
+    This class provides factory methods for creating different types of output mappers
+    that convert quantum probability distributions to classical neural network outputs.
+    """
 
     @staticmethod
     def create_mapping(strategy: OutputMappingStrategy, input_size: int, output_size: int):
-        """Create an output mapping based on strategy."""
+        """Create an output mapping based on the specified strategy.
+
+        Args:
+            strategy: The output mapping strategy to use
+            input_size: Size of the input probability distribution
+            output_size: Desired size of the output tensor
+
+        Returns:
+            A PyTorch module that maps input_size to output_size
+
+        Raises:
+            ValueError: If strategy is unknown or sizes are incompatible for 'none' strategy
+        """
         if strategy == OutputMappingStrategy.LINEAR:
             return nn.Linear(input_size, output_size)
         elif strategy in [OutputMappingStrategy.GROUPING, OutputMappingStrategy.LEXGROUPING]:
@@ -55,15 +71,33 @@ class OutputMapper:
 
 
 class LexGroupingMapper(nn.Module):
-    """Maps probability distributions using lexicographical grouping."""
+    """Maps probability distributions using lexicographical grouping.
+
+    This mapper groups consecutive elements of the probability distribution into
+    equal-sized buckets and sums them to produce the output. If the input size
+    is not evenly divisible by the output size, padding is applied.
+    """
 
     def __init__(self, input_size: int, output_size: int):
+        """Initialize the lexicographical grouping mapper.
+
+        Args:
+            input_size: Size of the input probability distribution
+            output_size: Desired size of the output tensor
+        """
         super().__init__()
         self.input_size = input_size
         self.output_size = output_size
 
     def forward(self, probability_distribution: torch.Tensor) -> torch.Tensor:
-        """Group probability distribution into equal-sized buckets."""
+        """Group probability distribution into equal-sized buckets.
+
+        Args:
+            probability_distribution: Input probability tensor of shape (batch_size, input_size) or (input_size,)
+
+        Returns:
+            Grouped probability tensor of shape (batch_size, output_size) or (output_size,)
+        """
         pad_size = (self.output_size - (self.input_size % self.output_size)) % self.output_size
 
         if pad_size > 0:
@@ -78,15 +112,33 @@ class LexGroupingMapper(nn.Module):
 
 
 class ModGroupingMapper(nn.Module):
-    """Maps probability distributions using modulo-based grouping."""
+    """Maps probability distributions using modulo-based grouping.
+
+    This mapper groups elements of the probability distribution based on their
+    index modulo the output size. Elements with the same modulo value are summed
+    together to produce the output.
+    """
 
     def __init__(self, input_size: int, output_size: int):
+        """Initialize the modulo grouping mapper.
+
+        Args:
+            input_size: Size of the input probability distribution
+            output_size: Desired size of the output tensor
+        """
         super().__init__()
         self.input_size = input_size
         self.output_size = output_size
 
     def forward(self, probability_distribution: torch.Tensor) -> torch.Tensor:
-        """Group probability distribution based on indices modulo output_size."""
+        """Group probability distribution based on indices modulo output_size.
+
+        Args:
+            probability_distribution: Input probability tensor of shape (batch_size, input_size) or (input_size,)
+
+        Returns:
+            Grouped probability tensor of shape (batch_size, output_size) or (output_size,)
+        """
         if self.output_size > self.input_size:
             if probability_distribution.dim() == 2:
                 pad_size = self.output_size - self.input_size

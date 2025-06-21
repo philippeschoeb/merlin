@@ -38,8 +38,9 @@ from .core.photonicbackend import PhotonicBackend
 from .pcvl_pytorch import CircuitConverter, build_slos_distribution_computegraph
 from .sampling.autodiff import AutoDiffProcess
 from .sampling.mappers import LexGroupingMapper, ModGroupingMapper, OutputMapper
+from .sampling.process import SamplingProcess
 from .sampling.strategies import OutputMappingStrategy
-from .torch_utils.torch_codes import FeatureEncoder, SamplingProcess
+from .torch_utils.torch_codes import FeatureEncoder
 
 # Version and metadata
 __version__ = "0.1.0"
