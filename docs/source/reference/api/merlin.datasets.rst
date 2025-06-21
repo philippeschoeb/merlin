@@ -12,9 +12,8 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   merlin.datasets.iris
    merlin.datasets.metadata
-   merlin.datasets.mlp_model
+   merlin.datasets.iris
    merlin.datasets.mnist_digits
    merlin.datasets.spiral
    merlin.datasets.utils

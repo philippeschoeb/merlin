@@ -232,6 +232,12 @@ def df_to_xy(df: pd.DataFrame,
 
     return X, y
 
+__all__ = [
+    "fetch",
+    "read_idx",
+    "df_to_xy"
+]
+
 if __name__ == "__main__":
     def _test_fetch():
         """Test the fetch function with MNIST dataset files"""

@@ -146,6 +146,8 @@ def get_data(num_instances=1500, num_features=10, num_classes=3, random_seed=42)
     return X, y, DatasetMetadata.from_dict(_metadata)
 
 
+__all__ = ["get_data"]
+
 # Example usage
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
