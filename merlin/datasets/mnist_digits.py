@@ -181,6 +181,10 @@ def get_data_test_percevalquest():
     MNIST_METADATA_PERCEVALQUEST["subset"] = "val"
     return X, y, DatasetMetadata.from_dict(MNIST_METADATA_PERCEVALQUEST)
 
+__all__ = [ "get_data_train_original",
+            "get_data_test_original",
+            "get_data_train_percevalquest",
+            "get_data_test_percevalquest" ]
 
 # Example usage
 if __name__ == "__main__":

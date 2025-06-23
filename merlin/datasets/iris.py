@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import numpy
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
@@ -108,10 +109,12 @@ IRIS_METADATA = {
     "year": 1936
 }
 
-def get_data_train():
+def get_data_train() -> tuple[numpy.ndarray, numpy.ndarray, DatasetMetadata]:
     IRIS_METADATA["subset"] = "train"
     return train_features, train_labels, DatasetMetadata.from_dict(IRIS_METADATA)
 
-def get_data_test():
+def get_data_test() -> tuple[numpy.ndarray, numpy.ndarray, DatasetMetadata]:
     IRIS_METADATA["subset"] = "test"
     return test_features, test_labels, DatasetMetadata.from_dict(IRIS_METADATA)
+
+__all__ = ["get_data_train", "get_data_test"]

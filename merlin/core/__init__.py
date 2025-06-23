@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# merlin/core/__init__.py
 """Core quantum layer components."""
 
 from .ansatz import Ansatz, AnsatzFactory
@@ -30,20 +29,6 @@ from .layer import QuantumLayer
 from .photonicbackend import PhotonicBackend
 from .process import ComputationProcess, ComputationProcessFactory
 
-__all__ = ["QuantumLayer", "PhotonicBackend", "Ansatz", "AnsatzFactory", "AbstractComputationProcess", "ComputationProcess", "ComputationProcessFactory", "CircuitType", "StatePattern", "CircuitGenerator", "StateGenerator"]
-
-
-
-
-
-
-# merlin/tests/__init__.py
-"""Test suite for Merlin."""
-
-__all__ = []
-
-
-# merlin/examples/__init__.py
-"""Example usage scripts."""
-
-__all__ = []
+__all__ = ["QuantumLayer", "PhotonicBackend", "Ansatz", "AnsatzFactory", "AbstractComputationProcess",
+           "ComputationProcess", "ComputationProcessFactory", "CircuitType", "StatePattern",
+           "CircuitGenerator", "StateGenerator"]

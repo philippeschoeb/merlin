@@ -274,6 +274,13 @@ class DatasetMetadata:
         }
 
 
+__all__ = [
+    "DatasetMetadata",
+    "Feature",
+    "FeatureNormalization",
+    "Normalization"
+]
+
 # Example usage:
 if __name__ == "__main__":
     from merlin.datasets import iris
