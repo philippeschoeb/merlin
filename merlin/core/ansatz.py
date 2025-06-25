@@ -24,7 +24,6 @@
 Ansatz configuration and factory for quantum layers.
 """
 
-
 import torch
 
 from ..core.generators import CircuitGenerator, StateGenerator
@@ -37,10 +36,15 @@ from .photonicbackend import PhotonicBackend
 class Ansatz:
     """Complete configuration for a quantum neural network layer."""
 
-    def __init__(self, PhotonicBackend: PhotonicBackend, input_size: int, output_size: int | None = None,
-                 output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.LINEAR,
-                 device: torch.device | None = None,
-                 dtype: torch.dtype | None = None):
+    def __init__(
+        self,
+        PhotonicBackend: PhotonicBackend,
+        input_size: int,
+        output_size: int | None = None,
+        output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.LINEAR,
+        device: torch.device | None = None,
+        dtype: torch.dtype | None = None,
+    ):
         self.experiment = PhotonicBackend
         self.input_size = input_size
         self.output_size = output_size
@@ -56,15 +60,16 @@ class Ansatz:
             PhotonicBackend.circuit_type, PhotonicBackend.n_modes, input_size
         )
 
-
         self.input_state = StateGenerator.generate_state(
-            PhotonicBackend.n_modes, PhotonicBackend.n_photons, PhotonicBackend.state_pattern
+            PhotonicBackend.n_modes,
+            PhotonicBackend.n_photons,
+            PhotonicBackend.state_pattern,
         )
 
         # Setup parameter patterns
         self.input_parameters = ["pl"]
         self.trainable_parameters = [] if PhotonicBackend.reservoir_mode else ["phi_"]
-        #self.trainable_parameters= ["phi"]
+        # self.trainable_parameters= ["phi"]
 
         # Create computation process with proper dtype
         self.computation_process = ComputationProcessFactory.create(
@@ -74,7 +79,7 @@ class Ansatz:
             input_parameters=self.input_parameters,
             reservoir_mode=PhotonicBackend.reservoir_mode,
             dtype=self.dtype,
-            device=self.device
+            device=self.device,
         )
 
 
@@ -82,10 +87,14 @@ class AnsatzFactory:
     """Factory for creating quantum layer ansatzes (complete configurations)."""
 
     @staticmethod
-    def create(PhotonicBackend: PhotonicBackend, input_size: int, output_size: int | None = None,
-               output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.LINEAR,
-               device: torch.device | None = None,
-               dtype: torch.dtype | None = None) -> Ansatz:
+    def create(
+        PhotonicBackend: PhotonicBackend,
+        input_size: int,
+        output_size: int | None = None,
+        output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.LINEAR,
+        device: torch.device | None = None,
+        dtype: torch.dtype | None = None,
+    ) -> Ansatz:
         """Create a complete ansatz configuration."""
         return Ansatz(
             PhotonicBackend=PhotonicBackend,
@@ -93,5 +102,5 @@ class AnsatzFactory:
             output_size=output_size,
             output_mapping_strategy=output_mapping_strategy,
             device=device,
-            dtype=dtype
+            dtype=dtype,
         )

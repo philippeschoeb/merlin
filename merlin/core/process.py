@@ -1,4 +1,3 @@
-
 # MIT License
 #
 # Copyright (c) 2025 Quandela
@@ -36,18 +35,19 @@ from .base import AbstractComputationProcess
 class ComputationProcess(AbstractComputationProcess):
     """Handles quantum circuit computation and state evolution."""
 
-    def __init__(self,
-                 circuit: pcvl.Circuit,
-                 input_state: list[int],
-                 trainable_parameters: list[str],
-                 input_parameters: list[str],
-                 reservoir_mode: bool = False,
-                 dtype: torch.dtype = torch.float32,
-                 device: torch.device | None = None,
-                 no_bunching: bool = None,
-                 output_map_func=None,
-                 index_photons=None):
-
+    def __init__(
+        self,
+        circuit: pcvl.Circuit,
+        input_state: list[int],
+        trainable_parameters: list[str],
+        input_parameters: list[str],
+        reservoir_mode: bool = False,
+        dtype: torch.dtype = torch.float32,
+        device: torch.device | None = None,
+        no_bunching: bool = None,
+        output_map_func=None,
+        index_photons=None,
+    ):
         self.circuit = circuit
         self.input_state = input_state
         self.trainable_parameters = trainable_parameters
@@ -70,12 +70,16 @@ class ComputationProcess(AbstractComputationProcess):
         """Setup unitary and simulation computation graphs."""
         # Determine parameter specs
         if self.reservoir_mode:
-            parameter_specs = self.trainable_parameters + self.input_parameters + ["phi_"]
+            parameter_specs = (
+                self.trainable_parameters + self.input_parameters + ["phi_"]
+            )
         else:
             parameter_specs = self.trainable_parameters + self.input_parameters
 
         # Build unitary graph
-        self.converter = CircuitConverter(self.circuit,parameter_specs,dtype=self.dtype, device=self.device)
+        self.converter = CircuitConverter(
+            self.circuit, parameter_specs, dtype=self.dtype, device=self.device
+        )
 
         # Build simulation graph with correct parameters
         self.simulation_graph = build_slos_distribution_computegraph(
@@ -86,7 +90,7 @@ class ComputationProcess(AbstractComputationProcess):
             keep_keys=True,  # Usually want to keep keys for output interpretation
             device=self.device,
             dtype=self.dtype,
-            index_photons=self.index_photons
+            index_photons=self.index_photons,
         )
 
     def compute(self, parameters: list[torch.Tensor]) -> torch.Tensor:
@@ -114,15 +118,17 @@ class ComputationProcessFactory:
     """Factory for creating computation processes."""
 
     @staticmethod
-    def create(circuit: pcvl.Circuit,
-               input_state: list[int],
-               trainable_parameters: list[str],
-               input_parameters: list[str],
-               reservoir_mode: bool = False,
-               no_bunching: bool = None,
-               output_map_func=None,
-               index_photons=None,
-               **kwargs) -> ComputationProcess:
+    def create(
+        circuit: pcvl.Circuit,
+        input_state: list[int],
+        trainable_parameters: list[str],
+        input_parameters: list[str],
+        reservoir_mode: bool = False,
+        no_bunching: bool = None,
+        output_map_func=None,
+        index_photons=None,
+        **kwargs,
+    ) -> ComputationProcess:
         """Create a computation process."""
         return ComputationProcess(
             circuit=circuit,
@@ -133,5 +139,5 @@ class ComputationProcessFactory:
             no_bunching=no_bunching,
             output_map_func=output_map_func,
             index_photons=index_photons,
-            **kwargs
+            **kwargs,
         )

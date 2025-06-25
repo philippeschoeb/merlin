@@ -54,12 +54,10 @@ __all__ = [
     "PhotonicBackend",
     "Ansatz",
     "AnsatzFactory",
-
     # Configuration enums
     "CircuitType",
     "StatePattern",
     "OutputMappingStrategy",
-
     # Advanced components
     "CircuitGenerator",
     "StateGenerator",
@@ -69,7 +67,6 @@ __all__ = [
     "OutputMapper",
     "LexGroupingMapper",
     "ModGroupingMapper",
-
     "CircuitConverter",
-    "build_slos_distribution_computegraph"
+    "build_slos_distribution_computegraph",
 ]
