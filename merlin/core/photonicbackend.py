@@ -39,7 +39,7 @@ class PhotonicBackend:
         use_bandwidth_tuning: bool = False,
         reservoir_mode: bool = False,
     ):
-        r"""Initalize the PhotonicBackend with the given configuration.
+        r"""Initialize the PhotonicBackend with the given configuration.
 
         Args:
             circuit_type: The circuit type to use.
