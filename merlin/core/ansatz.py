@@ -45,6 +45,16 @@ class Ansatz:
         device: torch.device | None = None,
         dtype: torch.dtype | None = None,
     ):
+        r"""Initialize the Ansatz with the given configuration.
+
+        Args:
+            PhotonicBackend (PhotonicBackend): The backend configuration to use.
+            input_size (int): Size of the input feature vector.
+            output_size (int | None): Size of the output vector. If None, it is defined by the backend.
+            output_mapping_strategy (OutputMappingStrategy): Strategy for mapping outputs.
+            device (torch.device | None): Device to run computations on.
+            dtype (torch.dtype | None): Data type for computations.
+        """
         self.experiment = PhotonicBackend
         self.input_size = input_size
         self.output_size = output_size
@@ -95,7 +105,19 @@ class AnsatzFactory:
         device: torch.device | None = None,
         dtype: torch.dtype | None = None,
     ) -> Ansatz:
-        """Create a complete ansatz configuration."""
+        r"""Create a complete ansatz configuration.
+
+        Args:
+            PhotonicBackend (PhotonicBackend): The backend configuration to use.
+            input_size (int): Size of the input feature vector.
+            output_size (int | None): Size of the output vector. If None, it is defined by the backend.
+            output_mapping_strategy (OutputMappingStrategy): Strategy for mapping outputs.
+            device (torch.device | None): Device to run computations on.
+            dtype (torch.dtype | None): Data type for computations.
+
+        Returns:
+            Ansatz: A complete ansatz configuration for the quantum layer.
+        """
         return Ansatz(
             PhotonicBackend=PhotonicBackend,
             input_size=input_size,
