@@ -43,9 +43,14 @@ class FeatureEncoder:
         """
         self.feature_count = feature_count
 
-    def encode(self, X_norm: torch.Tensor, circuit_type: CircuitType, n_modes: int,
-               bandwidth_coeffs: dict[str, torch.Tensor] | None = None,
-               total_shifters: int | None = None) -> torch.Tensor:
+    def encode(
+        self,
+        X_norm: torch.Tensor,
+        circuit_type: CircuitType,
+        n_modes: int,
+        bandwidth_coeffs: dict[str, torch.Tensor] | None = None,
+        total_shifters: int | None = None,
+    ) -> torch.Tensor:
         """Encode normalized features into quantum circuit parameters.
 
         Args:
@@ -95,7 +100,7 @@ class FeatureEncoder:
                 for m_idx in range(n_modes):
                     scale = get_scale(f"dim_{dim_idx}", m_idx)
                     multiplier = (m_idx + 1) * math.pi
-                    encoded = scale*multiplier * math.pi * X_norm[:, dim_idx]
+                    encoded = scale * multiplier * math.pi * X_norm[:, dim_idx]
                     cols.append(encoded.unsqueeze(1))
             return torch.cat(cols, dim=1)
 

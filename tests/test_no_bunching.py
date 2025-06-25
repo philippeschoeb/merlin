@@ -86,7 +86,9 @@ class TestNoBunchingFunctionality:
         circuit, _ = CircuitGenerator.generate_circuit(
             ML.CircuitType.PARALLEL_COLUMNS, n_modes, 2
         )
-        input_state = StateGenerator.generate_state(n_modes, n_photons, ML.StatePattern.SEQUENTIAL)
+        input_state = StateGenerator.generate_state(
+            n_modes, n_photons, ML.StatePattern.SEQUENTIAL
+        )
 
         # Create computation process with no_bunching=False
         process = ComputationProcessFactory.create(
@@ -94,7 +96,7 @@ class TestNoBunchingFunctionality:
             input_state=input_state,
             trainable_parameters=["phi_"],
             input_parameters=["pl"],
-            no_bunching=False
+            no_bunching=False,
         )
 
         # Create dummy parameters
@@ -114,7 +116,9 @@ class TestNoBunchingFunctionality:
         actual_size = distribution.shape[-1]
 
         print(f"Full Fock space - Expected: {expected_size}, Actual: {actual_size}")
-        assert actual_size == expected_size, f"Expected Fock space size {expected_size}, got {actual_size}"
+        assert (
+            actual_size == expected_size
+        ), f"Expected Fock space size {expected_size}, got {actual_size}"
 
     def test_computation_process_with_no_bunching_true(self):
         """Test computation process with no_bunching=True (single photon states only)."""
@@ -125,7 +129,9 @@ class TestNoBunchingFunctionality:
         circuit, _ = CircuitGenerator.generate_circuit(
             ML.CircuitType.PARALLEL_COLUMNS, n_modes, 2
         )
-        input_state = StateGenerator.generate_state(n_modes, n_photons, ML.StatePattern.SEQUENTIAL)
+        input_state = StateGenerator.generate_state(
+            n_modes, n_photons, ML.StatePattern.SEQUENTIAL
+        )
 
         # Create computation process with no_bunching=True
         process = ComputationProcessFactory.create(
@@ -133,7 +139,7 @@ class TestNoBunchingFunctionality:
             input_state=input_state,
             trainable_parameters=["phi_"],
             input_parameters=["pl"],
-            no_bunching=True
+            no_bunching=True,
         )
 
         # Create dummy parameters
@@ -153,7 +159,9 @@ class TestNoBunchingFunctionality:
         actual_size = distribution.shape[-1]
 
         print(f"No-bunching space - Expected: {expected_size}, Actual: {actual_size}")
-        assert actual_size == expected_size, f"Expected no-bunching size {expected_size}, got {actual_size}"
+        assert (
+            actual_size == expected_size
+        ), f"Expected no-bunching size {expected_size}, got {actual_size}"
 
     def test_quantum_layer_with_no_bunching_parameter(self):
         """Test QuantumLayer integration with no_bunching parameter."""
@@ -168,14 +176,16 @@ class TestNoBunchingFunctionality:
             circuit, _ = CircuitGenerator.generate_circuit(
                 ML.CircuitType.SERIES, n_modes, 2
             )
-            input_state = StateGenerator.generate_state(n_modes, n_photons, ML.StatePattern.PERIODIC)
+            input_state = StateGenerator.generate_state(
+                n_modes, n_photons, ML.StatePattern.PERIODIC
+            )
 
             process = ComputationProcessFactory.create(
                 circuit=circuit,
                 input_state=input_state,
                 trainable_parameters=["phi_"],
                 input_parameters=["pl"],
-                no_bunching=no_bunching
+                no_bunching=no_bunching,
             )
 
             # Create dummy parameters
@@ -196,7 +206,9 @@ class TestNoBunchingFunctionality:
 
             actual_size = distribution.shape[-1]
 
-            print(f"no_bunching={no_bunching}: Expected {expected_size}, Actual {actual_size}")
+            print(
+                f"no_bunching={no_bunching}: Expected {expected_size}, Actual {actual_size}"
+            )
             assert actual_size == expected_size
 
     def test_different_photon_numbers(self):
@@ -209,7 +221,9 @@ class TestNoBunchingFunctionality:
             circuit, _ = CircuitGenerator.generate_circuit(
                 ML.CircuitType.PARALLEL, n_modes, 2
             )
-            input_state = StateGenerator.generate_state(n_modes, n_photons, ML.StatePattern.SPACED)
+            input_state = StateGenerator.generate_state(
+                n_modes, n_photons, ML.StatePattern.SPACED
+            )
 
             # Test with no_bunching=True
             process_no_bunching = ComputationProcessFactory.create(
@@ -217,7 +231,7 @@ class TestNoBunchingFunctionality:
                 input_state=input_state,
                 trainable_parameters=["phi_"],
                 input_parameters=["pl"],
-                no_bunching=True
+                no_bunching=True,
             )
 
             # Test with no_bunching=False
@@ -226,7 +240,7 @@ class TestNoBunchingFunctionality:
                 input_state=input_state,
                 trainable_parameters=["phi_"],
                 input_parameters=["pl"],
-                no_bunching=False
+                no_bunching=False,
             )
 
             # Create dummy parameters
@@ -246,8 +260,12 @@ class TestNoBunchingFunctionality:
             expected_no_bunching = calculate_no_bunching_size(n_modes, n_photons)
             expected_full_fock = calculate_fock_space_size(n_modes, n_photons)
 
-            print(f"  No-bunching: {dist_no_bunching.shape[-1]} (expected {expected_no_bunching})")
-            print(f"  Full Fock: {dist_full_fock.shape[-1]} (expected {expected_full_fock})")
+            print(
+                f"  No-bunching: {dist_no_bunching.shape[-1]} (expected {expected_no_bunching})"
+            )
+            print(
+                f"  Full Fock: {dist_full_fock.shape[-1]} (expected {expected_full_fock})"
+            )
 
             assert dist_no_bunching.shape[-1] == expected_no_bunching
             assert dist_full_fock.shape[-1] == expected_full_fock
@@ -271,7 +289,7 @@ class TestNoBunchingFunctionality:
             input_state=input_state,
             trainable_parameters=["phi_"],
             input_parameters=["pl"],
-            no_bunching=True
+            no_bunching=True,
         )
 
         # The calculation shows this should be 0, but the system might handle it differently
@@ -306,7 +324,9 @@ class TestNoBunchingFunctionality:
         circuit, _ = CircuitGenerator.generate_circuit(
             ML.CircuitType.PARALLEL_COLUMNS, n_modes, 2
         )
-        input_state = StateGenerator.generate_state(n_modes, n_photons, ML.StatePattern.SEQUENTIAL)
+        input_state = StateGenerator.generate_state(
+            n_modes, n_photons, ML.StatePattern.SEQUENTIAL
+        )
 
         for no_bunching in [False, True]:
             process = ComputationProcessFactory.create(
@@ -314,7 +334,7 @@ class TestNoBunchingFunctionality:
                 input_state=input_state,
                 trainable_parameters=["phi_"],
                 input_parameters=["pl"],
-                no_bunching=no_bunching
+                no_bunching=no_bunching,
             )
 
             spec_mappings = process.converter.spec_mappings
@@ -334,7 +354,9 @@ class TestNoBunchingFunctionality:
                 # For single photon, Fock space = n_modes (same as no-bunching)
                 expected = n_modes
 
-            print(f"Single photon, no_bunching={no_bunching}: size={distribution.shape[-1]}, expected={expected}")
+            print(
+                f"Single photon, no_bunching={no_bunching}: size={distribution.shape[-1]}, expected={expected}"
+            )
             assert distribution.shape[-1] == expected
 
     def test_compute_with_keys_functionality(self):
@@ -345,14 +367,16 @@ class TestNoBunchingFunctionality:
         circuit, _ = CircuitGenerator.generate_circuit(
             ML.CircuitType.SERIES, n_modes, 2
         )
-        input_state = StateGenerator.generate_state(n_modes, n_photons, ML.StatePattern.PERIODIC)
+        input_state = StateGenerator.generate_state(
+            n_modes, n_photons, ML.StatePattern.PERIODIC
+        )
 
         process = ComputationProcessFactory.create(
             circuit=circuit,
             input_state=input_state,
             trainable_parameters=["phi_"],
             input_parameters=["pl"],
-            no_bunching=True
+            no_bunching=True,
         )
 
         spec_mappings = process.converter.spec_mappings

@@ -36,15 +36,11 @@ class TestRobustness:
     def test_large_batch_sizes(self):
         """Test handling of large batch sizes."""
         experiment = ML.PhotonicBackend(
-            circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-            n_modes=4,
-            n_photons=2
+            circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
         )
 
         ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
 
         layer = ML.QuantumLayer(input_size=2, ansatz=ansatz)
@@ -61,26 +57,24 @@ class TestRobustness:
     def test_extreme_input_values(self):
         """Test handling of extreme input values."""
         experiment = ML.PhotonicBackend(
-            circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-            n_modes=4,
-            n_photons=2
+            circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
         )
 
         ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
 
         layer = ML.QuantumLayer(input_size=2, ansatz=ansatz)
 
         # Test boundary values
-        boundary_inputs = torch.tensor([
-            [0.0, 0.0],  # All zeros
-            [1.0, 1.0],  # All ones
-            [0.0, 1.0],  # Mixed
-            [1.0, 0.0]  # Mixed reverse
-        ])
+        boundary_inputs = torch.tensor(
+            [
+                [0.0, 0.0],  # All zeros
+                [1.0, 1.0],  # All ones
+                [0.0, 1.0],  # Mixed
+                [1.0, 0.0],  # Mixed reverse
+            ]
+        )
 
         output = layer(boundary_inputs)
 
@@ -90,15 +84,11 @@ class TestRobustness:
     def test_numerical_stability(self):
         """Test numerical stability with repeated computations."""
         experiment = ML.PhotonicBackend(
-            circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-            n_modes=4,
-            n_photons=2
+            circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
         )
 
         ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
 
         layer = ML.QuantumLayer(input_size=2, ansatz=ansatz)
@@ -122,13 +112,11 @@ class TestRobustness:
             circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
             n_modes=4,
             n_photons=2,
-            use_bandwidth_tuning=True
+            use_bandwidth_tuning=True,
         )
 
         ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
 
         layer = ML.QuantumLayer(input_size=2, ansatz=ansatz)
@@ -154,61 +142,57 @@ class TestRobustness:
     def test_device_compatibility(self):
         """Test CPU compatibility (GPU testing would require CUDA)."""
         experiment = ML.PhotonicBackend(
-            circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-            n_modes=4,
-            n_photons=2
+            circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
         )
 
         ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
 
         # Test CPU device
-        layer_cpu = ML.QuantumLayer(input_size=2, ansatz=ansatz, device=torch.device('cpu'))
+        layer_cpu = ML.QuantumLayer(
+            input_size=2, ansatz=ansatz, device=torch.device("cpu")
+        )
 
-        x_cpu = torch.rand(3, 2, device='cpu')
+        x_cpu = torch.rand(3, 2, device="cpu")
         output_cpu = layer_cpu(x_cpu)
 
-        assert output_cpu.device.type == 'cpu'
+        assert output_cpu.device.type == "cpu"
         assert output_cpu.shape == (3, 3)
 
     def test_different_dtypes(self):
         """Test different data types."""
         experiment = ML.PhotonicBackend(
-            circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-            n_modes=4,
-            n_photons=2
+            circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
         )
 
         # Test float32
         ansatz_f32 = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3,
-            dtype=torch.float32
+            PhotonicBackend=experiment, input_size=2, output_size=3, dtype=torch.float32
         )
-        layer_f32 = ML.QuantumLayer(input_size=2, ansatz=ansatz_f32, dtype=torch.float32)
+        layer_f32 = ML.QuantumLayer(
+            input_size=2, ansatz=ansatz_f32, dtype=torch.float32
+        )
         x_f32 = torch.rand(2, 2, dtype=torch.float32)
         output_f32 = layer_f32(x_f32)
         assert output_f32.dtype == torch.float32
 
         # Test float64 - create separate ansatz with correct dtype
         ansatz_f64 = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3,
-            dtype=torch.float64
+            PhotonicBackend=experiment, input_size=2, output_size=3, dtype=torch.float64
         )
-        layer_f64 = ML.QuantumLayer(input_size=2, ansatz=ansatz_f64, dtype=torch.float64)
+        layer_f64 = ML.QuantumLayer(
+            input_size=2, ansatz=ansatz_f64, dtype=torch.float64
+        )
         x_f64 = torch.rand(2, 2, dtype=torch.float64)
         output_f64 = layer_f64(x_f64)
 
         # The output dtype might be influenced by the underlying quantum simulation
         # So we'll be more flexible and just check that it's a valid float type
-        assert output_f64.dtype in [torch.float32, torch.float64], \
-            f"Expected float type, got {output_f64.dtype}"
+        assert output_f64.dtype in [
+            torch.float32,
+            torch.float64,
+        ], f"Expected float type, got {output_f64.dtype}"
 
         # More importantly, check that the computation works correctly
         assert torch.all(torch.isfinite(output_f64))
@@ -217,15 +201,11 @@ class TestRobustness:
     def test_parameter_initialization_consistency(self):
         """Test that parameter initialization is consistent."""
         experiment = ML.PhotonicBackend(
-            circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-            n_modes=4,
-            n_photons=2
+            circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
         )
 
         ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
 
         # Create multiple layers with same random seed
@@ -236,23 +216,20 @@ class TestRobustness:
         layer2 = ML.QuantumLayer(input_size=2, ansatz=ansatz)
 
         # Parameters should be identical
-        assert len(list(layer1.parameters())) == len(list(layer2.parameters())), \
-            "Mismatch in number of parameters between layer1 and layer2"
+        assert len(list(layer1.parameters())) == len(
+            list(layer2.parameters())
+        ), "Mismatch in number of parameters between layer1 and layer2"
         for p1, p2 in zip(layer1.parameters(), layer2.parameters(), strict=True):
             assert torch.allclose(p1, p2, atol=1e-6)
 
     def test_memory_efficiency(self):
         """Test memory usage doesn't grow unexpectedly."""
         experiment = ML.PhotonicBackend(
-            circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-            n_modes=4,
-            n_photons=2
+            circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
         )
 
         ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
 
         layer = ML.QuantumLayer(input_size=2, ansatz=ansatz)
@@ -282,15 +259,11 @@ class TestIntegrationScenarios:
             def __init__(self):
                 super().__init__()
                 experiment = ML.PhotonicBackend(
-                    circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-                    n_modes=4,
-                    n_photons=2
+                    circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
                 )
 
                 ansatz = ML.AnsatzFactory.create(
-                    PhotonicBackend=experiment,
-                    input_size=3,
-                    output_size=4
+                    PhotonicBackend=experiment, input_size=3, output_size=4
                 )
 
                 self.quantum = ML.QuantumLayer(input_size=3, ansatz=ansatz)
@@ -313,8 +286,8 @@ class TestIntegrationScenarios:
         for epoch in range(10):
             epoch_loss = 0
             for i in range(0, len(X), 32):  # Batch size 32
-                batch_X = X[i:i + 32]
-                batch_y = y[i:i + 32]
+                batch_X = X[i : i + 32]
+                batch_y = y[i : i + 32]
 
                 optimizer.zero_grad()
                 outputs = model(batch_X)
@@ -341,41 +314,30 @@ class TestIntegrationScenarios:
 
                 # Classical preprocessing
                 self.pre_classical = nn.Sequential(
-                    nn.Linear(8, 6),
-                    nn.ReLU(),
-                    nn.Linear(6, 3)
+                    nn.Linear(8, 6), nn.ReLU(), nn.Linear(6, 3)
                 )
 
                 # First quantum layer
                 experiment1 = ML.PhotonicBackend(
-                    circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
-                    n_modes=4,
-                    n_photons=2
+                    circuit_type=ML.CircuitType.PARALLEL_COLUMNS, n_modes=4, n_photons=2
                 )
                 ansatz1 = ML.AnsatzFactory.create(
-                    PhotonicBackend=experiment1,
-                    input_size=3,
-                    output_size=5
+                    PhotonicBackend=experiment1, input_size=3, output_size=5
                 )
                 self.quantum1 = ML.QuantumLayer(input_size=3, ansatz=ansatz1)
 
                 # Middle classical processing
-                self.mid_classical = nn.Sequential(
-                    nn.Linear(5, 4),
-                    nn.ReLU()
-                )
+                self.mid_classical = nn.Sequential(nn.Linear(5, 4), nn.ReLU())
 
                 # Second quantum layer (reservoir)
                 experiment2 = ML.PhotonicBackend(
                     circuit_type=ML.CircuitType.PARALLEL,
                     n_modes=5,
                     n_photons=2,
-                    reservoir_mode=True
+                    reservoir_mode=True,
                 )
                 ansatz2 = ML.AnsatzFactory.create(
-                    PhotonicBackend=experiment2,
-                    input_size=4,
-                    output_size=3
+                    PhotonicBackend=experiment2, input_size=4, output_size=3
                 )
                 self.quantum2 = ML.QuantumLayer(input_size=4, ansatz=ansatz2)
 
@@ -426,13 +388,11 @@ class TestIntegrationScenarios:
                     experiment = ML.PhotonicBackend(
                         circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
                         n_modes=4,
-                        n_photons=2
+                        n_photons=2,
                     )
 
                     ansatz = ML.AnsatzFactory.create(
-                        PhotonicBackend=experiment,
-                        input_size=2,
-                        output_size=3
+                        PhotonicBackend=experiment, input_size=2, output_size=3
                     )
 
                     layer = ML.QuantumLayer(input_size=2, ansatz=ansatz)
@@ -468,9 +428,7 @@ class TestIntegrationScenarios:
         for i in range(len(individual_outputs)):
             for j in range(i + 1, len(individual_outputs)):
                 assert not torch.allclose(
-                    individual_outputs[i],
-                    individual_outputs[j],
-                    atol=1e-3
+                    individual_outputs[i], individual_outputs[j], atol=1e-3
                 ), f"Models {i} and {j} produced identical outputs"
 
     def test_saving_and_loading(self):
@@ -479,13 +437,11 @@ class TestIntegrationScenarios:
             circuit_type=ML.CircuitType.PARALLEL_COLUMNS,
             n_modes=4,
             n_photons=2,
-            use_bandwidth_tuning=True
+            use_bandwidth_tuning=True,
         )
 
         ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
 
         # Create and test original model
@@ -498,9 +454,7 @@ class TestIntegrationScenarios:
 
         # Create new model and load state
         new_ansatz = ML.AnsatzFactory.create(
-            PhotonicBackend=experiment,
-            input_size=2,
-            output_size=3
+            PhotonicBackend=experiment, input_size=2, output_size=3
         )
         new_layer = ML.QuantumLayer(input_size=2, ansatz=new_ansatz)
         new_layer.load_state_dict(state_dict)
@@ -508,4 +462,3 @@ class TestIntegrationScenarios:
         # Test that outputs are identical
         new_output = new_layer(x)
         assert torch.allclose(original_output, new_output, atol=1e-6)
-

@@ -31,6 +31,7 @@ import perceval as pcvl
 
 class CircuitType(Enum):
     """Quantum circuit topology types."""
+
     PARALLEL_COLUMNS = "parallel_columns"
     SERIES = "series"
     PARALLEL = "parallel"
@@ -38,10 +39,12 @@ class CircuitType(Enum):
 
 class StatePattern(Enum):
     """Input photon state patterns."""
+
     DEFAULT = "default"
     SPACED = "spaced"
     SEQUENTIAL = "sequential"
     PERIODIC = "periodic"
+
 
 class CircuitGenerator:
     """Utility class for generating quantum photonic circuits."""
@@ -56,18 +59,28 @@ class CircuitGenerator:
             raise ValueError(f"n_features must be positive, got {n_features}")
 
         if circuit_type == CircuitType.PARALLEL_COLUMNS:
-            return CircuitGenerator._build_parallel_columns_circuit(n_modes, n_features), n_features * n_modes
+            return CircuitGenerator._build_parallel_columns_circuit(
+                n_modes, n_features
+            ), n_features * n_modes
         elif circuit_type == CircuitType.SERIES:
             if n_features == 1:
-                return CircuitGenerator._build_series_simple_circuit(n_modes), n_modes - 1
+                return CircuitGenerator._build_series_simple_circuit(
+                    n_modes
+                ), n_modes - 1
             else:
                 num_params = min((1 << n_features) - 1, n_modes - 1)
-                return CircuitGenerator._build_series_multi_circuit(n_modes, n_features), num_params
+                return CircuitGenerator._build_series_multi_circuit(
+                    n_modes, n_features
+                ), num_params
         elif circuit_type == CircuitType.PARALLEL:
             if n_features == 1:
                 num_blocks = n_modes - 1
-                return CircuitGenerator._build_parallel_simple_circuit(n_modes, num_blocks), num_blocks
-            return CircuitGenerator._build_parallel_multi_circuit(n_modes, n_features), n_features
+                return CircuitGenerator._build_parallel_simple_circuit(
+                    n_modes, num_blocks
+                ), num_blocks
+            return CircuitGenerator._build_parallel_multi_circuit(
+                n_modes, n_features
+            ), n_features
         else:
             raise ValueError(f"Unknown circuit type: {circuit_type}")
 
@@ -76,11 +89,13 @@ class CircuitGenerator:
         """Generate a rectangular interferometer."""
 
         def mzi(P1, P2):
-            return (pcvl.Circuit(2)
-                    .add((0, 1), pcvl.BS())
-                    .add(0, pcvl.PS(P1))
-                    .add((0, 1), pcvl.BS())
-                    .add(0, pcvl.PS(P2)))
+            return (
+                pcvl.Circuit(2)
+                .add((0, 1), pcvl.BS())
+                .add(0, pcvl.PS(P1))
+                .add((0, 1), pcvl.BS())
+                .add(0, pcvl.PS(P2))
+            )
 
         offset = stage_idx * (n_modes * (n_modes - 1) // 2)
         shape = pcvl.InterferometerShape.RECTANGLE
@@ -88,13 +103,12 @@ class CircuitGenerator:
         return pcvl.GenericInterferometer(
             n_modes,
             fun_gen=lambda idx: mzi(
-                pcvl.P(f"phi_0{offset + idx}"),
-                pcvl.P(f"phi_1{offset + idx}")
+                pcvl.P(f"phi_0{offset + idx}"), pcvl.P(f"phi_1{offset + idx}")
             ),
             shape=shape,
             phase_shifter_fun_gen=lambda idx: pcvl.PS(
                 phi=pcvl.P(f"phi_02{stage_idx}_{idx}")
-            )
+            ),
         )
 
     @staticmethod
@@ -115,7 +129,7 @@ class CircuitGenerator:
         """Build a SERIES type circuit for a single feature."""
         circuit = pcvl.Circuit(n_modes)
         circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, 0))
-        for m_idx in range(n_modes-1):
+        for m_idx in range(n_modes - 1):
             circuit.add(m_idx, pcvl.PS(pcvl.P(f"pl{m_idx}x")))
 
         circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, 1))
@@ -127,18 +141,18 @@ class CircuitGenerator:
         circuit = pcvl.Circuit(n_modes)
         circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, 0))
         max_ps = min((1 << n_features) - 1, n_modes)
-        #max_ps = n_modes-1
+        # max_ps = n_modes-1
         ps_idx = 0
 
         for i in range(min(n_features, max_ps)):
             circuit.add(i, pcvl.PS(pcvl.P(f"pl{ps_idx}x")))
-            #circuit.add(i, pcvl.PS(pcvl.P(f"pl{i}x")))  # Use loop variable i instead
+            # circuit.add(i, pcvl.PS(pcvl.P(f"pl{i}x")))  # Use loop variable i instead
             ps_idx += 1
 
         if n_features >= 2 and ps_idx < max_ps:
             for i in range(ps_idx, max_ps):
                 circuit.add(i, pcvl.PS(pcvl.P(f"pl{ps_idx}x")))
-             #   circuit.add(i, pcvl.PS(pcvl.P(f"pl{i}x")))  # Use loop variable i instead
+                #   circuit.add(i, pcvl.PS(pcvl.P(f"pl{i}x")))  # Use loop variable i instead
 
                 ps_idx += 1
 
@@ -161,6 +175,7 @@ class CircuitGenerator:
 
         circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, 1))
         return circuit
+
     @staticmethod
     def _build_parallel_simple_circuit(n_modes, num_blocks):
         """Build a PARALLEL type circuit for a single feature."""
@@ -168,7 +183,9 @@ class CircuitGenerator:
         for b in range(num_blocks):
             circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, b))
             circuit.add(0, pcvl.PS(pcvl.P(f"pl{b}x")))
-        circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, num_blocks+1))
+        circuit.add(
+            0, CircuitGenerator._generate_interferometer(n_modes, num_blocks + 1)
+        )
 
         return circuit
 
@@ -179,12 +196,11 @@ class CircuitGenerator:
         for i in range(n_features):
             circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, i * 2))
             circuit.add(0, pcvl.PS(pcvl.P(f"pl{i}x")))
-           # circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, i * 2 + 1))
-        circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, n_features  + 1))
+        # circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, i * 2 + 1))
+        circuit.add(
+            0, CircuitGenerator._generate_interferometer(n_modes, n_features + 1)
+        )
         return circuit
-
-
-
 
 
 class StateGenerator:
