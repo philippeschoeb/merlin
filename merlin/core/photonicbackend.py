@@ -39,6 +39,16 @@ class PhotonicBackend:
         use_bandwidth_tuning: bool = False,
         reservoir_mode: bool = False,
     ):
+        r"""Initialize the PhotonicBackend with the given configuration.
+
+        Args:
+            circuit_type: The circuit type to use.
+            n_modes: Number of modes in the circuit.
+            n_photons: Number of photons to place in the circuit.
+            state_pattern: The state pattern to use (default is periodic).
+            use_bandwidth_tuning: Whether to use bandwidth tuning (default is False).
+            reservoir_mode: Whether to use reservoir mode (default is False).
+        """
         # Validate circuit_type
         if isinstance(circuit_type, str):
             try:
