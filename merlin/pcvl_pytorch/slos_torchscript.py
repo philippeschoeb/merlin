@@ -911,12 +911,12 @@ if __name__ == "__main__":
 
         # Method 1: Build graph with specified precision
         start_time = time.time()
-        graph = build_slos_distribution_computegraph(input_state, dtype=dtype)
+        graph = build_slos_distribution_computegraph(m, 2, dtype=dtype)
         build_time = time.time() - start_time
 
         # Compute probabilities
         start_time = time.time()
-        keys, probs = graph.compute(q)
+        keys, probs = graph.compute(q, input_state)
         compute_time = time.time() - start_time
 
         print("  Method 1 (explicit graph building):")
