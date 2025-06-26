@@ -897,8 +897,8 @@ if __name__ == "__main__":
     dtype_names = ["float32", "float64"]
 
     # Create a test case
-    m = 4  # 4-mode circuit
     input_state = [1, 1, 0, 0]  # Two photons in first two modes
+    m = len(input_state)  # Number of modes derived from input_state
     n_photons = sum(input_state)
 
     for idx, dtype in enumerate(dtypes):
