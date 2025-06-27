@@ -897,8 +897,9 @@ if __name__ == "__main__":
     dtype_names = ["float32", "float64"]
 
     # Create a test case
-    m = 4  # 4-mode circuit
     input_state = [1, 1, 0, 0]  # Two photons in first two modes
+    m = len(input_state)  # Number of modes derived from input_state
+    n_photons = sum(input_state)
 
     for idx, dtype in enumerate(dtypes):
         print(f"\nTesting with {dtype_names[idx]} precision:")
@@ -911,12 +912,12 @@ if __name__ == "__main__":
 
         # Method 1: Build graph with specified precision
         start_time = time.time()
-        graph = build_slos_distribution_computegraph(input_state, dtype=dtype)
+        graph = build_slos_distribution_computegraph(m, n_photons, dtype=dtype)
         build_time = time.time() - start_time
 
         # Compute probabilities
         start_time = time.time()
-        keys, probs = graph.compute(q)
+        keys, probs = graph.compute(q, input_state)
         compute_time = time.time() - start_time
 
         print("  Method 1 (explicit graph building):")
