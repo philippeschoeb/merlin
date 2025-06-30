@@ -475,7 +475,7 @@ class TestNoBunchingFunctionality:
             assert new_keys == keys_no_bunching
             assert torch.allclose(new_distribution, distribution_no_bunching)
             print(
-                "Convertion from distribution_full_fock_space to distribution_no_bunching completed successfully"
+                "Conversion from distribution_full_fock_space to distribution_no_bunching completed successfully"
             )
 
 
