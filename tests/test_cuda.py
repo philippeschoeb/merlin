@@ -41,6 +41,7 @@ def test_load_model_on_cuda():
         circuit=circuit,
         input_state=[1, 1, 0, 0],
         trainable_parameters=["phi_"],
+        input_parameters=[],
         device=torch.device("cuda"),
     )
     assert layer.device == torch.device("cuda")
@@ -69,6 +70,7 @@ def test_switch_model_to_cuda():
         circuit=circuit,
         input_state=[1, 1, 0, 0],
         trainable_parameters=["phi_"],
+        input_parameters=[],
         device=torch.device("cpu"),
     )
     assert layer.device == torch.device("cpu")
