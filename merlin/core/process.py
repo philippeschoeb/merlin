@@ -26,7 +26,7 @@ Quantum computation processes and factories.
 
 import perceval as pcvl
 import torch
-from typing import List, Optional
+
 from merlin.pcvl_pytorch import CircuitConverter, build_slos_distribution_computegraph
 
 from .base import AbstractComputationProcess
@@ -38,7 +38,7 @@ class ComputationProcess(AbstractComputationProcess):
     def __init__(
         self,
         circuit: pcvl.Circuit,
-        input_state: list[int],
+        input_state: list[int] | dict[list[int], float],
         trainable_parameters: list[str],
         input_parameters: list[str],
         reservoir_mode: bool = False,
@@ -60,7 +60,7 @@ class ComputationProcess(AbstractComputationProcess):
         self.index_photons = index_photons
 
         # Extract circuit parameters for graph building
-        if type(input_state) is dict:
+        if isinstance(input_state, dict):
             input_state = list(input_state.keys())[0]
         self.m = len(input_state)  # Number of modes
         self.n_photons = sum(input_state)  # Total number of photons
@@ -101,7 +101,7 @@ class ComputationProcess(AbstractComputationProcess):
         unitary = self.converter.to_tensor(*parameters)
 
         # Compute output distribution using the input state
-        if type(self.input_state) is dict:
+        if isinstance(self.input_state, dict):
             input_state = list(self.input_state.keys())[0]
         else:
             input_state = self.input_state
@@ -109,14 +109,17 @@ class ComputationProcess(AbstractComputationProcess):
 
         return distribution
 
-    def compute_superposition_state(self, parameters: List[torch.Tensor]) -> torch.Tensor:
+    def compute_superposition_state(
+        self, parameters: list[torch.Tensor]
+    ) -> torch.Tensor:
         unitary = self.converter.to_tensor(*parameters)
 
         def is_swap_permutation(t1, t2):
-
             if t1 == t2:
                 return False
-            diff = [(i, i) for i, (x, y) in enumerate(zip(t1, t2)) if x != y]
+            diff = [
+                (i, i) for i, (x, y) in enumerate(zip(t1, t2, strict=False)) if x != y
+            ]
             if len(diff) != 2:
                 return False
             i, j = diff[0][0], diff[1][0]
@@ -124,9 +127,6 @@ class ComputationProcess(AbstractComputationProcess):
             return t1[i] == t2[j] and t1[j] == t2[i]
 
         def reorder_swap_chain(lst):
-
-            from collections import deque
-
             remaining = lst[:]
             chain = [remaining.pop(0)]  # Commence avec le premier élément
             while remaining:
@@ -139,14 +139,22 @@ class ComputationProcess(AbstractComputationProcess):
 
             return chain
 
-        state_list = reorder_swap_chain(list(self.input_state.keys()))
+        if isinstance(self.input_state, dict):
+            state_list = reorder_swap_chain(list(self.input_state.keys()))
+        else:
+            # If input_state is a list, we shouldn't be in this code path
+            raise ValueError(
+                "input_state must be a dict for superposition state computation"
+            )
 
         prev_state = state_list.pop(0)
         keys, distribution = self.simulation_graph.compute(unitary, prev_state)
         distributions = distribution * self.input_state[prev_state]
 
         for fock_state in state_list:
-            keys, distribution = self.simulation_graph.compute_pa_inc(unitary, prev_state, fock_state)
+            keys, distribution = self.simulation_graph.compute_pa_inc(
+                unitary, prev_state, fock_state
+            )
             distributions += distribution * self.input_state[fock_state]
             prev_state = fock_state
 
@@ -169,7 +177,7 @@ class ComputationProcessFactory:
     @staticmethod
     def create(
         circuit: pcvl.Circuit,
-        input_state: list[int],
+        input_state: list[int] | dict[list[int], float],
         trainable_parameters: list[str],
         input_parameters: list[str],
         reservoir_mode: bool = False,

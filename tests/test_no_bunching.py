@@ -117,9 +117,9 @@ class TestNoBunchingFunctionality:
         actual_size = distribution.shape[-1]
 
         print(f"Full Fock space - Expected: {expected_size}, Actual: {actual_size}")
-        assert (
-            actual_size == expected_size
-        ), f"Expected Fock space size {expected_size}, got {actual_size}"
+        assert actual_size == expected_size, (
+            f"Expected Fock space size {expected_size}, got {actual_size}"
+        )
 
     def test_computation_process_with_no_bunching_true(self):
         """Test computation process with no_bunching=True (single photon states only)."""
@@ -160,9 +160,9 @@ class TestNoBunchingFunctionality:
         actual_size = distribution.shape[-1]
 
         print(f"No-bunching space - Expected: {expected_size}, Actual: {actual_size}")
-        assert (
-            actual_size == expected_size
-        ), f"Expected no-bunching size {expected_size}, got {actual_size}"
+        assert actual_size == expected_size, (
+            f"Expected no-bunching size {expected_size}, got {actual_size}"
+        )
 
     def test_quantum_layer_with_no_bunching_parameter(self):
         """Test QuantumLayer integration with no_bunching parameter."""
@@ -410,9 +410,9 @@ class TestNoBunchingFunctionality:
                     param_count_n_b = len(spec_mappings_no_bunching[spec])
                     if spec in spec_mappings_full_fock_space:
                         param_count_f_f_s = len(spec_mappings_full_fock_space[spec])
-                        assert (
-                            param_count_n_b == param_count_f_f_s
-                        ), "Different circuits for no_bunching and full_fock_space"
+                        assert param_count_n_b == param_count_f_f_s, (
+                            "Different circuits for no_bunching and full_fock_space"
+                        )
                         dummy_params.append(torch.randn(param_count_f_f_s))
                     else:
                         raise Exception(

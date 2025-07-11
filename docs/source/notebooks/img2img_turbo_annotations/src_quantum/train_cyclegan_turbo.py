@@ -92,7 +92,7 @@ def main(args):
 
     crit_cycle, crit_idt = torch.nn.L1Loss(), torch.nn.L1Loss()
 
-    ##### LOAD PRETRAINED WEIGHTS #####
+    # LOAD PRETRAINED WEIGHTS #####
     if args.quantum_dynamic or args.cl_comp:
         print("- building the model")
         unet, l_modules_unet_encoder, l_modules_unet_decoder, l_modules_unet_others = (
@@ -185,7 +185,7 @@ def main(args):
             f"-- For unet.conv_in = {sum(p.numel() for p in unet.conv_in.parameters() if p.requires_grad)} - unet.conv_out = {sum(p.numel() for p in unet.conv_out.parameters() if p.requires_grad)} "
         )
     print(
-        f"-- TOTAL parameters = {sum(p.numel() for p in unet.parameters())+sum(p.numel() for p in vae_a2b.parameters())+sum(p.numel() for p in vae_b2a.parameters())}"
+        f"-- TOTAL parameters = {sum(p.numel() for p in unet.parameters()) + sum(p.numel() for p in vae_a2b.parameters()) + sum(p.numel() for p in vae_b2a.parameters())}"
     )
     print(
         f"-- TOTAL trainable parameters = {sum(p.numel() for p in unet.parameters() if p.requires_grad) + sum(p.numel() for p in vae_a2b.parameters() if p.requires_grad) + sum(p.numel() for p in vae_b2a.parameters() if p.requires_grad)}"

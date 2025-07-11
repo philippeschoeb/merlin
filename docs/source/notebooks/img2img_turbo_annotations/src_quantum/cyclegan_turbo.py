@@ -377,14 +377,12 @@ class CycleGAN_Turbo(torch.nn.Module):
             timesteps,
             encoder_hidden_states=text_emb,
         ).sample
-        x_out = torch.stack(
-            [
-                sched.step(
-                    model_pred[i], timesteps[i], x_enc[i], return_dict=True
-                ).prev_sample
-                for i in range(B)
-            ]
-        )
+        x_out = torch.stack([
+            sched.step(
+                model_pred[i], timesteps[i], x_enc[i], return_dict=True
+            ).prev_sample
+            for i in range(B)
+        ])
         x_out_decoded = vae_dec(x_out, direction=direction)
         return x_out_decoded
 
@@ -448,14 +446,12 @@ class CycleGAN_Turbo(torch.nn.Module):
             encoder_hidden_states=text_emb,
         ).sample
 
-        x_out = torch.stack(
-            [
-                sched.step(
-                    model_pred[i], timesteps[i], x_enc[i], return_dict=True
-                ).prev_sample
-                for i in range(B)
-            ]
-        )
+        x_out = torch.stack([
+            sched.step(
+                model_pred[i], timesteps[i], x_enc[i], return_dict=True
+            ).prev_sample
+            for i in range(B)
+        ])
         x_out_decoded = vae_dec(x_out, direction=direction)
         if starter_bool:
             # print("Returning x_out_decoded and q_emb")

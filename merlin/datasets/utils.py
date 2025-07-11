@@ -185,7 +185,7 @@ def read_idx(filepath: Path) -> tuple[np.ndarray, dict]:
 
         # Read the data
         dtype = dtype_map[data_type]
-        data = np.frombuffer(f.read(), dtype=dtype)
+        data = np.frombuffer(f.read(), dtype=dtype)  # type: ignore[call-overload]
 
         # Reshape according to dimensions
         data = data.reshape(dims)
@@ -218,7 +218,7 @@ def df_to_xy(
     """
     if feature_cols is None and label_cols is None:
         # Assume last column is label
-        feature_cols = df.columns[:-1]
+        feature_cols = df.columns[:-1].tolist()  # type: ignore[assignment]
         label_cols = [df.columns[-1]]
     elif feature_cols is None:
         # Use all columns except label columns as features
@@ -231,7 +231,7 @@ def df_to_xy(
     y = df[label_cols].to_numpy()
 
     # If single label column, flatten the array
-    if len(label_cols) == 1:
+    if label_cols is not None and len(label_cols) == 1:
         y = y.ravel()
 
     return X, y

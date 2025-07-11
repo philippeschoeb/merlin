@@ -50,7 +50,7 @@ parser.add_argument(
 parser.add_argument("--hp", type=bool, default=False, help="Set Half Precision")
 
 
-def benchmark_BS(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
+def benchmark_bs(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
     """
     Benchmark memory usage for a GenericInterferometer running with MerLin support.
 
@@ -78,7 +78,7 @@ def benchmark_BS(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
     """
 
     print(
-        f"\n Testing the GPU with a Batch size of {BS} for a circuit with {MODES} modes and {MODES//2} photons"
+        f"\n Testing the GPU with a Batch size of {BS} for a circuit with {MODES} modes and {MODES // 2} photons"
     )
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     if device == "cpu":
@@ -105,7 +105,7 @@ def benchmark_BS(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
     print(f"\n ----- \nWorking on {MODES} modes with {PHOTONS} photons \n -----")
 
     ####################################
-    ### Quantum Layer initialisation ###
+    # Quantum Layer initialisation ###
     ####################################
 
     # Building the input state from the number of photons
@@ -117,13 +117,11 @@ def benchmark_BS(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
     print(
         f"\n Create circuit with input state = {input_state} (nb photons = {sum(input_state)}, nb parameters = {nb_parameters})"
     )
-    input_size = len(
-        [
-            p.name
-            for p in circuit.get_parameters()
-            if p.name.startswith("theta") or p.name.startswith("phase")
-        ]
-    )
+    input_size = len([
+        p.name
+        for p in circuit.get_parameters()
+        if p.name.startswith("theta") or p.name.startswith("phase")
+    ])
     q_model = QuantumLayer(
         input_size=input_size,
         output_size=None,
@@ -139,7 +137,7 @@ def benchmark_BS(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
     t_end_layer = time.time() - t_start_layer
 
     ###################################
-    ### Computing the target values ###
+    # Computing the target values ###
     ###################################
 
     t_init = time.time()
@@ -171,7 +169,7 @@ def benchmark_BS(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
 
     print("\n TRAINING IS STARTING \n")
     ##########################################
-    ### training loop to match the targets ###
+    # training loop to match the targets ###
     ##########################################
 
     # initialization of the parameters
@@ -218,9 +216,7 @@ def benchmark_BS(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
         # t_backward = time.time()
         history_backward.append(t_backward - t_end_forward)
         history_forward.append(t_end_forward - t_start_epoch)
-        print(
-            f"\n --> Iteration {epoch + 1}/{N_EPOCHS}: " f"Loss = {loss.item():.4f}, "
-        )
+        print(f"\n --> Iteration {epoch + 1}/{N_EPOCHS}: Loss = {loss.item():.4f}, ")
 
         # memory monitoring
         nvsmi = nvidia_smi.getInstance()
@@ -238,17 +234,17 @@ def benchmark_BS(MODES=8, PHOTONS=4, BS=32, TYPE=torch.float32, set_hp=False):
         torch_reserved_history.append(torch.cuda.memory_reserved() / (1024 * 1024))
         print(
             f"Memory allocated for PyTorch "
-            f"\n - allocated: {torch.cuda.memory_allocated() / (1024 * 1024) :.2f} MB"
-            f"\n - reserved: {torch.cuda.memory_reserved() / (1024 * 1024) :.2f} MB"
+            f"\n - allocated: {torch.cuda.memory_allocated() / (1024 * 1024):.2f} MB"
+            f"\n - reserved: {torch.cuda.memory_reserved() / (1024 * 1024):.2f} MB"
         )
         pynvml.nvmlInit()
         handle = pynvml.nvmlDeviceGetHandleByIndex(0)
         info = pynvml.nvmlDeviceGetMemoryInfo(handle)
         print(
             f"With pynvml"
-            f"\n - total: {info.total / (1024 * 1024) :.2f} MB"
-            f"\n - free: {info.free / (1024 * 1024) :.2f} MB"
-            f"\n - used: {info.used / (1024 * 1024) :.2f} MB"
+            f"\n - total: {info.total / (1024 * 1024):.2f} MB"
+            f"\n - free: {info.free / (1024 * 1024):.2f} MB"
+            f"\n - used: {info.used / (1024 * 1024):.2f} MB"
         )
 
     # final results
@@ -317,12 +313,12 @@ def save_experiment_results(results, filename="bunched_results.json"):
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    assert (
-        args.photons <= args.modes // 2
-    ), "You cannot have more photons than half the number of modes"
+    assert args.photons <= args.modes // 2, (
+        "You cannot have more photons than half the number of modes"
+    )
     assert args.photons > 0, "You need at least 1 photon !"
 
-    benchmark_BS(
+    benchmark_bs(
         MODES=args.modes,
         PHOTONS=args.photons,
         BS=args.bs,

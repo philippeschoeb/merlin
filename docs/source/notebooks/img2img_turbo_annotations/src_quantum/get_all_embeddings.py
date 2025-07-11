@@ -15,7 +15,7 @@ from PIL import Image
 from quantum_encoder import BosonSampler, QEncoder
 from tqdm.auto import tqdm
 
-### small functions ###
+# small functions ###
 
 
 # load images and paths from Dataset
@@ -55,7 +55,7 @@ def prepare_image(img_path, transform):
     return img_t
 
 
-### GENERAL FUNCTION ###
+# GENERAL FUNCTION ###
 
 
 def get_dataset_embeddings(model_path, target_folder):
@@ -63,12 +63,12 @@ def get_dataset_embeddings(model_path, target_folder):
     if not os.path.exists(target_folder):
         os.mkdir(target_folder)
 
-    ### load classical model ###
+    # load classical model ###
     # sd = torch.load(quantum_start_path)
     cyclegan_q = CycleGAN_Turbo(pretrained_path=model_path).to("cuda:0")
     print("--- Model loaded ---")
 
-    ### dataset and image for test ###
+    # dataset and image for test ###
     transform = build_transform(image_prep="resize_128")
     data_folder = "../data/dataset_full_scale/"
     train_images_A = os.path.join(data_folder, "test_A")
@@ -79,7 +79,7 @@ def get_dataset_embeddings(model_path, target_folder):
     # dataset_train = UnpairedDataset(dataset_folder="../data/dataset_full_scale/", image_prep="resize_128", split="train", tokenizer=tokenizer)
     print("--- Data loaded ---")
 
-    ### quantum encoder ###
+    # quantum encoder ###
     # Set the random seeds
     torch.manual_seed(42)
     dims = (4, 16, 16)
@@ -138,7 +138,7 @@ target = "/home/jupyter-pemeriau/q_embs/all_emb_128_dims_4_16_16_ckpt1001_42"
 get_dataset_embeddings(quantum_start_path, target)
 
 
-### READ THE DATA ###
+# READ THE DATA ###
 
 # with h5py.File("/home/jupyter-pemeriau/q_embs/test4/train_A.h5", "r") as f:
 #     # Get a list of all dataset names

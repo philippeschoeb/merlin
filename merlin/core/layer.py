@@ -27,6 +27,7 @@ Main QuantumLayer implementation with bug fixes and index_photons support.
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import numpy as np
 import perceval as pcvl
@@ -67,8 +68,8 @@ class QuantumLayer(nn.Module):
         circuit: pcvl.Circuit | None = None,
         input_state: list[int] | None = None,
         n_photons: int | None = None,
-        trainable_parameters: list[str] = (),
-        input_parameters: list[str] = (),
+        trainable_parameters: list[str] = None,
+        input_parameters: list[str] = None,
         # Common parameters
         output_mapping_strategy: OutputMappingStrategy = OutputMappingStrategy.LINEAR,
         device: torch.device | None = None,
@@ -298,11 +299,14 @@ class QuantumLayer(nn.Module):
                 )
                 self.register_buffer("phi_static", phi_tensor)
 
-    def _setup_parameters_from_custom(self, trainable_parameters: list[str]):
+    def _setup_parameters_from_custom(self, trainable_parameters: list[str] | None):
         """Setup parameters from custom circuit configuration."""
         spec_mappings = self.computation_process.converter.spec_mappings
         self.thetas = []
         self.theta_names = []
+
+        if trainable_parameters is None:
+            return
 
         for tp in trainable_parameters:
             if tp in spec_mappings:
@@ -401,7 +405,7 @@ class QuantumLayer(nn.Module):
             dummy_input = torch.zeros(
                 self.ansatz.total_shifters, dtype=self.dtype, device=self.device
             )
-            params.append(dummy_input)
+            params.append(dummy_input)  # type: ignore[arg-type]
         else:
             # For custom circuits, create dummy based on input parameter count
             spec_mappings = self.computation_process.converter.spec_mappings
@@ -412,13 +416,13 @@ class QuantumLayer(nn.Module):
                     dummy_input = torch.zeros(
                         param_count, dtype=self.dtype, device=self.device
                     )
-                    params.append(dummy_input)
+                    params.append(dummy_input)  # type: ignore[arg-type]
 
         # Add static phi parameters if in reservoir mode
         if hasattr(self, "phi_static"):
-            params.append(self.phi_static)
+            params.append(self.phi_static)  # type: ignore[arg-type]
 
-        return params
+        return params  # type: ignore[return-value]
 
     def _prepare_input_encoding(self, x: torch.Tensor) -> torch.Tensor:
         """Prepare input encoding based on mode."""
@@ -430,7 +434,7 @@ class QuantumLayer(nn.Module):
                 x_norm,
                 self.ansatz.experiment.circuit_type,
                 self.ansatz.experiment.n_modes,
-                self.bandwidth_coeffs,
+                self.bandwidth_coeffs,  # type: ignore[arg-type]
             )
         else:
             # For custom circuits, apply 2π scaling directly
@@ -461,9 +465,9 @@ class QuantumLayer(nn.Module):
         if hasattr(self, "phi_static"):
             if input_parameters and input_parameters[0].dim() > 1:
                 batch_size = input_parameters[0].shape[0]
-                params.append(self.phi_static.expand(batch_size, -1))
+                params.append(self.phi_static.expand(batch_size, -1))  # type: ignore[operator]
             else:
-                params.append(self.phi_static)
+                params.append(self.phi_static)  # type: ignore[arg-type]
 
         return params
 
@@ -544,20 +548,18 @@ class QuantumLayer(nn.Module):
                 "message": "No photon placement constraints (photons can be placed in any mode)",
             }
 
-        info = {
+        info: dict[str, Any] = {
             "constrained": True,
             "n_photons": len(self.index_photons),
             "constraints": [],
         }
 
         for i, (min_mode, max_mode) in enumerate(self.index_photons):
-            info["constraints"].append(
-                {
-                    "photon_index": i,
-                    "allowed_modes": f"[{min_mode}, {max_mode}]",
-                    "n_allowed_modes": max_mode - min_mode + 1,
-                }
-            )
+            info["constraints"].append({
+                "photon_index": i,
+                "allowed_modes": f"[{min_mode}, {max_mode}]",
+                "n_allowed_modes": max_mode - min_mode + 1,
+            })
 
         return info
 

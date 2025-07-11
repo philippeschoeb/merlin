@@ -150,16 +150,16 @@ def layer_compute_vectorized(
         contributions.to(destinations.device),  # values to add
     )
 
-
     return result
 
 
-def layer_compute_backward(unitary: torch.Tensor,
-                           sources: torch.Tensor,
-                           destinations: torch.Tensor,
-                           modes: torch.Tensor,
-                           m: int,
-                        ) -> torch.Tensor:
+def layer_compute_backward(
+    unitary: torch.Tensor,
+    sources: torch.Tensor,
+    destinations: torch.Tensor,
+    modes: torch.Tensor,
+    m: int,
+) -> torch.Tensor:
     """
     Compute amplitudes for a single layer using vectorized operations.
 
@@ -177,8 +177,6 @@ def layer_compute_backward(unitary: torch.Tensor,
     inverts = []
     computing_tensors = []
     for p in range(m):
-        batch_size = unitary.shape[0]
-
         # Determine output size
         size_sources = int(sources.max().item()) + 1
         size_destinations = int(destinations.max().item()) + 1
@@ -186,10 +184,14 @@ def layer_compute_backward(unitary: torch.Tensor,
         # Get unitary elements for all operations
         u_elements = torch.diag_embed(unitary[:, modes, p])
 
-        destinations_tensor = torch.zeros((1, size_destinations, modes.shape[0]), dtype=u_elements.dtype)
+        destinations_tensor = torch.zeros(
+            (1, size_destinations, modes.shape[0]), dtype=u_elements.dtype
+        )
         destinations_tensor[:, destinations, torch.arange(destinations.shape[0])] = 1
 
-        sources_tensor = torch.zeros((1, sources.shape[0], size_sources), dtype=u_elements.dtype)
+        sources_tensor = torch.zeros(
+            (1, sources.shape[0], size_sources), dtype=u_elements.dtype
+        )
         sources_tensor[:, torch.arange(sources.shape[0]), sources] = 1
 
         computing_tensor = destinations_tensor @ u_elements @ sources_tensor
@@ -197,10 +199,7 @@ def layer_compute_backward(unitary: torch.Tensor,
     batch_tensors = torch.stack(computing_tensors, dim=0)
     inverts = torch.linalg.pinv(batch_tensors)
 
-
-
     return inverts
-
 
 
 class SLOSComputeGraph:
@@ -220,7 +219,7 @@ class SLOSComputeGraph:
         keep_keys: bool = True,
         device=None,  # Optional device parameter
         dtype: torch.dtype = torch.float,  # Optional dtype parameter
-        index_photons: [tuple[int, ...]] = None,
+        index_photons: list[tuple[int, ...]] = None,
     ):
         """
         Initialize the SLOS computation graph.
@@ -248,7 +247,6 @@ class SLOSComputeGraph:
         self.prev_amplitudes = None
         self.dtype = dtype
         self.ct_inverts = None
-
 
         if index_photons is None:
             index_photons = [(0, self.m - 1)] * self.n_photons
@@ -374,17 +372,13 @@ class SLOSComputeGraph:
 
             # Create a partial function with fixed operation
             def make_layer_fn(s, d, m):
-                return (
-                    lambda u,
+                return lambda u, prev, p_val: layer_compute_vectorized(
+                    u,
                     prev,
-                    p_val: layer_compute_vectorized(
-                        u,
-                        prev,
-                        s,
-                        d,
-                        m,
-                        p_val,
-                    )
+                    s,
+                    d,
+                    m,
+                    p_val,
                 )
 
             self.layer_functions.append(make_layer_fn(sources, destinations, modes))
@@ -503,10 +497,12 @@ class SLOSComputeGraph:
         for layer_idx, layer_fn in enumerate(self.layer_functions):
             p = idx_n[layer_idx]
             amplitudes = layer_fn(
-                unitary, amplitudes, p,
+                unitary,
+                amplitudes,
+                p,
             )
 
-        self.prev_amplitudes = amplitudes
+        self.prev_amplitudes = amplitudes  # type: ignore[assignment]
         # Calculate probabilities
         # probabilities = (amplitudes.abs() ** 2).real
         probabilities = amplitudes.real**2 + amplitudes.imag**2
@@ -540,8 +536,12 @@ class SLOSComputeGraph:
 
     def _prepare_pa_inc(self, unitary):
         self.ct_inverts = []
-        for layer_idx, (sources, destinations, modes) in enumerate(self.vectorized_operations):
-            self.ct_inverts.append(layer_compute_backward(unitary, sources, destinations, modes, self.m))
+        for _layer_idx, (sources, destinations, modes) in enumerate(
+            self.vectorized_operations
+        ):
+            self.ct_inverts.append(
+                layer_compute_backward(unitary, sources, destinations, modes, self.m)
+            )
 
     def to(self, dtype: torch.dtype, device: str | torch.device):
         """
@@ -634,6 +634,10 @@ class SLOSComputeGraph:
                 idx_n_neg.extend([i] * abs(p))
 
         amplitudes = self.prev_amplitudes
+        if amplitudes is None:
+            raise RuntimeError(
+                "prev_amplitudes is None - compute must be called before forward"
+            )
 
         num_changes = len(idx_n_pos)
 
@@ -646,11 +650,15 @@ class SLOSComputeGraph:
                 amplitudes = amplitudes.unsqueeze(1) @ torch.transpose(invert, -2, -1)
                 amplitudes = amplitudes.squeeze(1)
 
-            for layer_idx, (sources, destinations, modes) in enumerate(vectorized_operations):
+            for layer_idx, (sources, destinations, modes) in enumerate(
+                vectorized_operations
+            ):
                 p_pos = idx_n_pos[layer_idx]
-                amplitudes = layer_compute_vectorized(unitary, amplitudes, sources, destinations, modes, p_pos)
+                amplitudes = layer_compute_vectorized(
+                    unitary, amplitudes, sources, destinations, modes, p_pos
+                )
 
-        self.prev_amplitudes = amplitudes
+        self.prev_amplitudes = amplitudes  # type: ignore[assignment]
         # Calculate probabilities
         # probabilities = (amplitudes.abs() ** 2).real
         probabilities = amplitudes.real**2 + amplitudes.imag**2
@@ -687,12 +695,12 @@ class SLOSComputeGraph:
 def build_slos_distribution_computegraph(
     m,
     n_photons,
-    output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] = None,
+    output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] | None = None,
     no_bunching: bool = False,
     keep_keys: bool = True,
     device=None,
     dtype: torch.dtype = torch.float,
-    index_photons: [tuple[int, ...]] = None,
+    index_photons: list[tuple[int, ...]] | None = None,
 ) -> SLOSComputeGraph:
     """
     Build a computation graph for Strong Linear Optical Simulation (SLOS) algorithm
@@ -757,7 +765,7 @@ def build_slos_distribution_computegraph(
         )
 
     # Attach the save method to the compute_graph
-    compute_graph.save = save
+    compute_graph.save = save  # type: ignore[attr-defined]
 
     return compute_graph
 
@@ -836,10 +844,10 @@ def load_slos_distribution_computegraph(path):
 def compute_slos_distribution(
     unitary: torch.Tensor,
     input_state: list[int],
-    output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] = None,
+    output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] | None = None,
     no_bunching: bool = False,
     keep_keys: bool = True,
-    index_photons: [tuple[int, ...]] = None,
+    index_photons: list[tuple[int, ...]] | None = None,
 ) -> tuple[list[tuple[int, ...]], torch.Tensor]:
     """
     TorchScript-optimized version of pytorch_slos_output_distribution.

@@ -28,7 +28,7 @@ noise_scheduler_1step = make_1step_sched()
 accelerator = Accelerator(gradient_accumulation_steps=1)
 
 ################
-## PARAMETERS ##
+# PARAMETERS ##
 ################
 
 OUTPUT_DIR = "/home/jupyter-pemeriau/img2img-turbo/all_outputs/exp-114/test"
@@ -39,7 +39,7 @@ feat_model = build_feature_extractor("clean", "cuda", use_dataparallel=False)
 T_val = build_transform("resize_128")
 
 ################
-## REFERENCES ##
+# REFERENCES ##
 ################
 
 l_images_src_test = []
@@ -130,7 +130,7 @@ if accelerator.is_main_process:
     )
 
 ###############
-## TEXT EMBS ##
+# TEXT EMBS ##
 ###############
 print("-- Defining the text embeddings --")
 tokenizer = AutoTokenizer.from_pretrained(
@@ -165,7 +165,7 @@ fixed_b2a_emb_base = text_encoder(fixed_b2a_tokens.cuda().unsqueeze(0))[0].detac
 
 
 ################
-## LOAD MODEL ##
+# LOAD MODEL ##
 ################
 def create_model_from(quantum_start_path):
     sd = torch.load(quantum_start_path)
@@ -201,7 +201,7 @@ csv_name = os.path.join(OUTPUT_DIR, "metrics.csv")
 # with open(csv_name, mode='w', newline='') as file:
 #     pass  # Do nothing, just create the file
 ################
-## GET SCORES ##
+# GET SCORES ##
 ################
 all_paths_files = os.listdir(
     "/home/jupyter-pemeriau/img2img-turbo/all_outputs/exp-114/checkpoints"

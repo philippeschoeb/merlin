@@ -63,12 +63,12 @@ if __name__ == "__main__":
         raise ValueError("prompt is required when loading a custom model_path.")
 
     if args.model_name is not None:
-        assert (
-            args.prompt is None
-        ), "prompt is not required when loading a pretrained model."
-        assert (
-            args.direction is None
-        ), "direction is not required when loading a pretrained model."
+        assert args.prompt is None, (
+            "prompt is not required when loading a pretrained model."
+        )
+        assert args.direction is None, (
+            "direction is not required when loading a pretrained model."
+        )
 
     # initialize the model
     model = CycleGAN_Turbo(

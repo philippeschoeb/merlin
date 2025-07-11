@@ -565,16 +565,14 @@ def main(
     shutil.rmtree(fid_output_dir)
     print("-- Folder for b2a has been removed --")
 
-    df = pd.DataFrame(
-        [
-            {
-                "fid(a2b)": score_fid_a2b,
-                "fid(b2a)": score_fid_b2a,
-                "dino(a2b)": dino_score_a2b,
-                "dino(b2a)": dino_score_b2a,
-            }
-        ]
-    )
+    df = pd.DataFrame([
+        {
+            "fid(a2b)": score_fid_a2b,
+            "fid(b2a)": score_fid_b2a,
+            "dino(a2b)": dino_score_a2b,
+            "dino(b2a)": dino_score_b2a,
+        }
+    ])
     df.to_csv(
         os.path.join(EXP_PATH, f"fid-all-{global_step}", "metrics.csv"), index=False
     )

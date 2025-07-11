@@ -140,30 +140,6 @@ class CircuitGenerator:
         """Build a SERIES type circuit for multiple features."""
         circuit = pcvl.Circuit(n_modes)
         circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, 0))
-        max_ps = min((1 << n_features) - 1, n_modes)
-        # max_ps = n_modes-1
-        ps_idx = 0
-
-        for i in range(min(n_features, max_ps)):
-            circuit.add(i, pcvl.PS(pcvl.P(f"pl{ps_idx}x")))
-            # circuit.add(i, pcvl.PS(pcvl.P(f"pl{i}x")))  # Use loop variable i instead
-            ps_idx += 1
-
-        if n_features >= 2 and ps_idx < max_ps:
-            for i in range(ps_idx, max_ps):
-                circuit.add(i, pcvl.PS(pcvl.P(f"pl{ps_idx}x")))
-                #   circuit.add(i, pcvl.PS(pcvl.P(f"pl{i}x")))  # Use loop variable i instead
-
-                ps_idx += 1
-
-        circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, 1))
-        return circuit
-
-    @staticmethod
-    def _build_series_multi_circuit(n_modes, n_features):
-        """Build a SERIES type circuit for multiple features."""
-        circuit = pcvl.Circuit(n_modes)
-        circuit.add(0, CircuitGenerator._generate_interferometer(n_modes, 0))
 
         # Based on the paper: we need 2^n_features - 1 phase shifters
         # but limited by n_modes - 1 (can't have more phase shifters than modes allow)
