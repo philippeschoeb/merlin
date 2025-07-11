@@ -153,9 +153,9 @@ class CircuitConverter:
 
         self.set_dtype(dtype)
 
-        assert isinstance(
-            circuit, Circuit
-        ), f"Expected a Perceval LO circuit, but got {type(circuit).__name__}"
+        assert isinstance(circuit, Circuit), (
+            f"Expected a Perceval LO circuit, but got {type(circuit).__name__}"
+        )
         self.circuit = circuit
 
         # Create parameter mapping - it will map parameter names to their index in the input tensors
