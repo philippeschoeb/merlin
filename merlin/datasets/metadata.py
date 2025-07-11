@@ -184,7 +184,7 @@ class DatasetMetadata:
 
         return cls(
             name=data["name"],
-            subset=data.get("subset"),
+            subset=data.get("subset") or "",
             description=data.get("description", data.get("abstract", "")).strip(),
             features=features,
             num_instances=num_instances,

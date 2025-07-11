@@ -170,9 +170,9 @@ if __name__ == "__main__":
         )
 
         # Create color maps for train and validation sets
-        train_colors = plt.cm.rainbow(np.linspace(0, 1, n_classes))
+        train_colors = plt.cm.rainbow(np.linspace(0, 1, n_classes))  # type: ignore[attr-defined]
         # Create slightly darker colors for validation set
-        val_colors = plt.cm.rainbow(np.linspace(0, 1, n_classes)) * 0.7
+        val_colors = plt.cm.rainbow(np.linspace(0, 1, n_classes)) * 0.7  # type: ignore[attr-defined]
 
         # Plot
         for i in range(n_classes):

@@ -409,6 +409,6 @@ if __name__ == "__main__":
         result = bs.compute(L(a.view(16, 32)).view(dims))
         loss = result.square().sum()  # dummy example to check if the backward propagation and the optimization step work
         loss.backward(retain_graph=True)
-        print(f"Iteration {i+1}, loss: {loss.item():.6f}")
+        print(f"Iteration {i + 1}, loss: {loss.item():.6f}")
         optimizer.step()
         optimizer.zero_grad()

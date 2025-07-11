@@ -67,14 +67,12 @@ class TestRobustness:
         layer = ML.QuantumLayer(input_size=2, ansatz=ansatz)
 
         # Test boundary values
-        boundary_inputs = torch.tensor(
-            [
-                [0.0, 0.0],  # All zeros
-                [1.0, 1.0],  # All ones
-                [0.0, 1.0],  # Mixed
-                [1.0, 0.0],  # Mixed reverse
-            ]
-        )
+        boundary_inputs = torch.tensor([
+            [0.0, 0.0],  # All zeros
+            [1.0, 1.0],  # All ones
+            [0.0, 1.0],  # Mixed
+            [1.0, 0.0],  # Mixed reverse
+        ])
 
         output = layer(boundary_inputs)
 
@@ -216,9 +214,9 @@ class TestRobustness:
         layer2 = ML.QuantumLayer(input_size=2, ansatz=ansatz)
 
         # Parameters should be identical
-        assert len(list(layer1.parameters())) == len(
-            list(layer2.parameters())
-        ), "Mismatch in number of parameters between layer1 and layer2"
+        assert len(list(layer1.parameters())) == len(list(layer2.parameters())), (
+            "Mismatch in number of parameters between layer1 and layer2"
+        )
         for p1, p2 in zip(layer1.parameters(), layer2.parameters(), strict=True):
             assert torch.allclose(p1, p2, atol=1e-6)
 

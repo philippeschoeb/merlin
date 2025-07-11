@@ -414,39 +414,33 @@ def build_transform(image_prep):
     - torchvision.transforms.Compose: A composable sequence of transformations to be applied to images.
     """
     if image_prep == "resized_crop_512":
-        T = transforms.Compose(
-            [
-                transforms.Resize(
-                    512, interpolation=transforms.InterpolationMode.LANCZOS
-                ),
-                transforms.CenterCrop(512),
-            ]
-        )
+        T = transforms.Compose([
+            transforms.Resize(512, interpolation=transforms.InterpolationMode.LANCZOS),
+            transforms.CenterCrop(512),
+        ])
     elif image_prep == "resize_286_randomcrop_256x256_hflip":
-        T = transforms.Compose(
-            [
-                transforms.Resize((286, 286), interpolation=Image.LANCZOS),
-                transforms.RandomCrop((256, 256)),
-                transforms.RandomHorizontalFlip(),
-            ]
-        )
+        T = transforms.Compose([
+            transforms.Resize((286, 286), interpolation=Image.LANCZOS),
+            transforms.RandomCrop((256, 256)),
+            transforms.RandomHorizontalFlip(),
+        ])
     elif image_prep in ["resize_256", "resize_256x256"]:
-        T = transforms.Compose(
-            [transforms.Resize((256, 256), interpolation=Image.LANCZOS)]
-        )
+        T = transforms.Compose([
+            transforms.Resize((256, 256), interpolation=Image.LANCZOS)
+        ])
     elif image_prep in ["resize_512", "resize_512x512"]:
-        T = transforms.Compose(
-            [transforms.Resize((512, 512), interpolation=Image.LANCZOS)]
-        )
+        T = transforms.Compose([
+            transforms.Resize((512, 512), interpolation=Image.LANCZOS)
+        ])
     elif image_prep in ["resize_128", "resize_128x128"]:
-        T = transforms.Compose(
-            [transforms.Resize((128, 128), interpolation=Image.LANCZOS)]
-        )
+        T = transforms.Compose([
+            transforms.Resize((128, 128), interpolation=Image.LANCZOS)
+        ])
 
     elif image_prep in ["resize_64", "resize_64x64"]:
-        T = transforms.Compose(
-            [transforms.Resize((64, 64), interpolation=Image.LANCZOS)]
-        )
+        T = transforms.Compose([
+            transforms.Resize((64, 64), interpolation=Image.LANCZOS)
+        ])
     elif image_prep == "no_resize":
         T = transforms.Lambda(lambda x: x)
     return T

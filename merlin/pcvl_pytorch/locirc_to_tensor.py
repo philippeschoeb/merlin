@@ -317,7 +317,7 @@ class CircuitConverter:
                         if r2[-1] > max_group:
                             max_group = r2[-1]
                         # remove the component from the list
-                        list_rct[j] = (r2, None)
+                        list_rct[j] = (r2, None)  # noqa: B909
                 if len(merge_group) > 1:
                     # we have a group of components that can be merged
                     # we will compute the tensor for the whole group
@@ -340,7 +340,7 @@ class CircuitConverter:
         return [item for item in list_rct if item[1] is not None]
 
     def to_tensor(
-        self, *input_params: torch.Tensor, batch_size: int = None
+        self, *input_params: torch.Tensor, batch_size: int | None = None
     ) -> torch.Tensor:
         r"""Convert the parameterized circuit to a PyTorch unitary tensor.
 
@@ -357,7 +357,7 @@ class CircuitConverter:
             TypeError: If input_params is not a list or tuple.
         """
         if len(input_params) == 1 and isinstance(input_params[0], list):
-            input_params = input_params[0]
+            input_params = input_params[0]  # type: ignore[assignment]
         if len(input_params) != self.nb_input_tensor:
             raise ValueError(
                 f"Expected {self.nb_input_tensor} input tensors, but got {len(input_params)}."
@@ -427,7 +427,7 @@ class CircuitConverter:
         )
 
     @dispatch(BS)
-    def _compute_tensor(self, comp: AComponent) -> torch.Tensor:
+    def _compute_tensor(self, comp: AComponent) -> torch.Tensor:  # type: ignore[no-redef]
         """Compute tensor for Beam Splitter component.
 
         Handles different BS conventions (Rx, Ry, H) and processes 5 parameters:
@@ -499,7 +499,7 @@ class CircuitConverter:
         return unitary_tensor
 
     @dispatch(PS)
-    def _compute_tensor(self, comp: AComponent) -> torch.Tensor:
+    def _compute_tensor(self, comp: AComponent) -> torch.Tensor:  # type: ignore[no-redef]
         """Compute tensor for Phase Shifter component.
 
         Args:

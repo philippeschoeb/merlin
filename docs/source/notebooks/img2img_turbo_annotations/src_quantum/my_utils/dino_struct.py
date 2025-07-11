@@ -214,15 +214,13 @@ class DinoStructureLoss:
         self,
     ):
         self.extractor = VitExtractor(model_name="dino_vitb8", device="cuda")
-        self.preprocess = torchvision.transforms.Compose(
-            [
-                torchvision.transforms.Resize(224),
-                torchvision.transforms.ToTensor(),
-                torchvision.transforms.Normalize(
-                    (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
-                ),
-            ]
-        )
+        self.preprocess = torchvision.transforms.Compose([
+            torchvision.transforms.Resize(224),
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize(
+                (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)
+            ),
+        ])
 
     def calculate_global_ssim_loss(self, outputs, inputs):
         loss = 0.0

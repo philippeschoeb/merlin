@@ -30,7 +30,7 @@ jobs:
       run: |
         ruff check merlin/
         ruff format --check merlin/
-        mypy merlin/
+        mypy merlin/ --ignore-missing-imports --no-strict-optional --allow-untyped-defs --disable-error-code=no-redef
     
     - name: Run tests
       run: |

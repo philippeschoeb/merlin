@@ -303,7 +303,7 @@ def test_circuit_with_subcircuit():
     torch.allclose(torch_tensor, exptd_u)
 
 
-def test_circuit_with_PERM_and_batch():
+def test_circuit_with_perm_and_batch():
     c1 = Circuit(2) // (0, BS()) // (1, PS(Parameter("x"))) // (0, BS())
     circ = Circuit(2) // (0, PERM([1, 0]))
     circ.add(0, c1, merge=False)

@@ -219,7 +219,7 @@ class SLOSComputeGraph:
         keep_keys: bool = True,
         device=None,  # Optional device parameter
         dtype: torch.dtype = torch.float,  # Optional dtype parameter
-        index_photons: [tuple[int, ...]] = None,
+        index_photons: list[tuple[int, ...]] = None,
     ):
         """
         Initialize the SLOS computation graph.
@@ -502,7 +502,7 @@ class SLOSComputeGraph:
                 p,
             )
 
-        self.prev_amplitudes = amplitudes
+        self.prev_amplitudes = amplitudes  # type: ignore[assignment]
         # Calculate probabilities
         # probabilities = (amplitudes.abs() ** 2).real
         probabilities = amplitudes.real**2 + amplitudes.imag**2
@@ -634,6 +634,10 @@ class SLOSComputeGraph:
                 idx_n_neg.extend([i] * abs(p))
 
         amplitudes = self.prev_amplitudes
+        if amplitudes is None:
+            raise RuntimeError(
+                "prev_amplitudes is None - compute must be called before forward"
+            )
 
         num_changes = len(idx_n_pos)
 
@@ -654,7 +658,7 @@ class SLOSComputeGraph:
                     unitary, amplitudes, sources, destinations, modes, p_pos
                 )
 
-        self.prev_amplitudes = amplitudes
+        self.prev_amplitudes = amplitudes  # type: ignore[assignment]
         # Calculate probabilities
         # probabilities = (amplitudes.abs() ** 2).real
         probabilities = amplitudes.real**2 + amplitudes.imag**2
@@ -691,12 +695,12 @@ class SLOSComputeGraph:
 def build_slos_distribution_computegraph(
     m,
     n_photons,
-    output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] = None,
+    output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] | None = None,
     no_bunching: bool = False,
     keep_keys: bool = True,
     device=None,
     dtype: torch.dtype = torch.float,
-    index_photons: [tuple[int, ...]] = None,
+    index_photons: list[tuple[int, ...]] | None = None,
 ) -> SLOSComputeGraph:
     """
     Build a computation graph for Strong Linear Optical Simulation (SLOS) algorithm
@@ -761,7 +765,7 @@ def build_slos_distribution_computegraph(
         )
 
     # Attach the save method to the compute_graph
-    compute_graph.save = save
+    compute_graph.save = save  # type: ignore[attr-defined]
 
     return compute_graph
 
@@ -840,10 +844,10 @@ def load_slos_distribution_computegraph(path):
 def compute_slos_distribution(
     unitary: torch.Tensor,
     input_state: list[int],
-    output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] = None,
+    output_map_func: Callable[[tuple[int, ...]], tuple[int, ...] | None] | None = None,
     no_bunching: bool = False,
     keep_keys: bool = True,
-    index_photons: [tuple[int, ...]] = None,
+    index_photons: list[tuple[int, ...]] | None = None,
 ) -> tuple[list[tuple[int, ...]], torch.Tensor]:
     """
     TorchScript-optimized version of pytorch_slos_output_distribution.

@@ -38,7 +38,7 @@ class ComputationProcess(AbstractComputationProcess):
     def __init__(
         self,
         circuit: pcvl.Circuit,
-        input_state: list[int],
+        input_state: list[int] | dict[list[int], float],
         trainable_parameters: list[str],
         input_parameters: list[str],
         reservoir_mode: bool = False,
@@ -139,7 +139,13 @@ class ComputationProcess(AbstractComputationProcess):
 
             return chain
 
-        state_list = reorder_swap_chain(list(self.input_state.keys()))
+        if isinstance(self.input_state, dict):
+            state_list = reorder_swap_chain(list(self.input_state.keys()))
+        else:
+            # If input_state is a list, we shouldn't be in this code path
+            raise ValueError(
+                "input_state must be a dict for superposition state computation"
+            )
 
         prev_state = state_list.pop(0)
         keys, distribution = self.simulation_graph.compute(unitary, prev_state)
@@ -171,7 +177,7 @@ class ComputationProcessFactory:
     @staticmethod
     def create(
         circuit: pcvl.Circuit,
-        input_state: list[int],
+        input_state: list[int] | dict[list[int], float],
         trainable_parameters: list[str],
         input_parameters: list[str],
         reservoir_mode: bool = False,
