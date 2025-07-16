@@ -388,16 +388,22 @@ class CircuitConverter:
         # Build unitary tensor by composing component unitaries
         for r, c in self.list_rct:
             if isinstance(c, torch.Tensor):
+                print(True)
                 # If the component is already a tensor, use it directly, just move it to the correct device and dtype
                 # and expand it to the batch size
                 curr_comp_tensor = c.to(
                     dtype=self.tensor_cdtype, device=self.device
                 ).expand(batch_size, -1, -1)
+                assert curr_comp_tensor.dtype == self.tensor_cdtype, 'Change of type in if'
             else:
+                print(False)
                 curr_comp_tensor = self._compute_tensor(c)
+                assert curr_comp_tensor.dtype == self.tensor_cdtype, 'Change of type in else'
 
             # Compose unitaries
             contribution = converted_tensor[..., r[0] : (r[-1] + 1), :].clone()
+            print(self.tensor_cdtype)
+            print(f'curr_comp_tensor dtype: {curr_comp_tensor.dtype} and contribution dtype: {contribution.dtype}')
             converted_tensor[..., r[0] : (r[-1] + 1), :] = (
                 curr_comp_tensor @ contribution.to(curr_comp_tensor.device)
             )
@@ -418,13 +424,15 @@ class CircuitConverter:
         Returns:
             Batched unitary tensor of shape (batch_size, comp_size, comp_size)
         """
-        return (
+        unitary_tensor = (
             torch.tensor(
                 comp.compute_unitary(), dtype=self.tensor_cdtype, device=self.device
             )
             .unsqueeze(0)
             .expand(self.batch_size, -1, -1)
         )
+        print(f'Coming out of Unitary or PERM compute dtype: {unitary_tensor.dtype}')
+        return unitary_tensor
 
     @dispatch(BS)
     def _compute_tensor(self, comp: AComponent) -> torch.Tensor:  # type: ignore[no-redef]
@@ -496,6 +504,7 @@ class CircuitConverter:
         unitary_tensor[..., 0, 1] *= u01_mul.to(self.device) * sin_theta
         unitary_tensor[..., 1, 1] *= u11_mul.to(self.device) * cos_theta
         unitary_tensor[..., 1, 0] *= u10_mul.to(self.device) * sin_theta
+        print(f'Coming out of BS compute dtype: {unitary_tensor.dtype}')
         return unitary_tensor
 
     @dispatch(PS)
@@ -512,8 +521,11 @@ class CircuitConverter:
             (tensor_id, idx_in_tensor) = self.param_mapping[comp.param("phi").name]
             phase = self.torch_params[tensor_id][..., idx_in_tensor]
         else:
-            phase = torch.tensor(
+            '''phase = torch.tensor(
                 comp.param("phi")._value, dtype=self.tensor_fdtype, device=self.device
+            )'''
+            phase = torch.tensor(
+                comp.param("phi")._value, dtype=self.tensor_cdtype, device=self.device
             )
 
         if comp._max_error:
@@ -523,4 +535,5 @@ class CircuitConverter:
         unitary_tensor = torch.exp(1j * phase).reshape(
             -1, 1
         )  # reshape so that in any case, we have 2 dim
+        print(f'Coming out of PS compute dtype: {unitary_tensor.dtype}')
         return unitary_tensor.unsqueeze(-1)  # to change shape of tensor to (b, 1, 1)
