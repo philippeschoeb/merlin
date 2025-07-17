@@ -518,17 +518,21 @@ class CircuitConverter:
             Batched 1x1 phase tensor of shape (batch_size, 1, 1)
         """
         if comp.param("phi").is_variable:
+            print('comp.param("phi").is_variable')
             (tensor_id, idx_in_tensor) = self.param_mapping[comp.param("phi").name]
             phase = self.torch_params[tensor_id][..., idx_in_tensor]
+            phase = phase.to(self.tensor_cdtype)
         else:
-            '''phase = torch.tensor(
-                comp.param("phi")._value, dtype=self.tensor_fdtype, device=self.device
-            )'''
+            print(' NOT comp.param("phi").is_variable')
             phase = torch.tensor(
-                comp.param("phi")._value, dtype=self.tensor_cdtype, device=self.device
+                comp.param("phi")._value, dtype=self.tensor_fdtype, device=self.device
             )
+            '''phase = torch.tensor(
+                comp.param("phi")._value, dtype=self.tensor_cdtype, device=self.device
+            )'''
 
         if comp._max_error:
+            print('max_error')
             err = float(comp._max_error) * random.uniform(-1, 1)
             phase += err
 
