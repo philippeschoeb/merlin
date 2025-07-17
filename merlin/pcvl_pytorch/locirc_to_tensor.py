@@ -511,6 +511,7 @@ class CircuitConverter:
         if comp.param("phi").is_variable:
             (tensor_id, idx_in_tensor) = self.param_mapping[comp.param("phi").name]
             phase = self.torch_params[tensor_id][..., idx_in_tensor]
+            phase = phase.to(self.tensor_cdtype)
         else:
             phase = torch.tensor(
                 comp.param("phi")._value, dtype=self.tensor_fdtype, device=self.device
